@@ -30,13 +30,13 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
 uint64_t fixedpoint_whole_part(Fixedpoint val) {
   // TODO: implement
   assert(0);
-  return 0UL;
+  return whole_part;
 }
 
 uint64_t fixedpoint_frac_part(Fixedpoint val) {
   // TODO: implement
   assert(0);
-  return 0UL;
+  return frac_part;
 }
 
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
@@ -78,7 +78,7 @@ int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
 int fixedpoint_is_zero(Fixedpoint val) {
   // TODO: implement
   assert(0);
-  return 0;
+  return val.whole_part == 0 && val.frac_part == 0;
 }
 
 int fixedpoint_is_err(Fixedpoint val) {

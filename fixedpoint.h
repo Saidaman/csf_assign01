@@ -2,9 +2,13 @@
 #define FIXEDPREC_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef struct {
-  // TODO: add fields
+  uint64_t whole_part;
+  uint64_t frac_part;
+  bool neg;
+  bool invalid;
 } Fixedpoint;
 
 // Create a Fixedpoint value representing an integer.
