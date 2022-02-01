@@ -4,11 +4,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+// Struct representing a Fixedpoint value. 
+// Fixedpoint value has a whole part, fraction part, 
+// and a tag indicating the value's state.
 typedef struct {
   uint64_t whole_part;
   uint64_t frac_part;
-  bool neg;
-  bool invalid;
+  enum {vnon, vneg, error, posover, negover, posunder, negunder} tags;
 } Fixedpoint;
 
 // Create a Fixedpoint value representing an integer.
