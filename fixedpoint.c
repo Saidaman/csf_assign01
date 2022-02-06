@@ -80,13 +80,11 @@ int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
   else if (leftWhole > rightWhole) {
     return 1;
   }
-  else {
-    if (leftFrac < rightFrac) {
-      return -1;
-    }
-    else if (leftFrac > rightFrac) {
-      return 1;
-    }
+  else if (leftFrac < rightFrac) {
+    return -1;
+  }
+  else if (leftFrac > rightFrac) {
+    return 1;
   }
   return 0;
 }
