@@ -87,12 +87,7 @@ int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
     else if (leftFrac > rightFrac) {
       return 1;
     }
-    else {
-      return 0;
-    }
   }
-  // TODO: implement
-  assert(0);
   return 0;
 }
 
