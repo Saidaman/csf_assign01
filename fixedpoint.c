@@ -70,6 +70,27 @@ Fixedpoint fixedpoint_double(Fixedpoint val) {
 }
 
 int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
+  uint64_t leftWhole = left.whole_part;
+  uint64_t leftFrac = left.frac_part;
+  uint64_t rightWhole = right.whole_part;
+  uint64_t rightFrac = left.frac_part;
+  if (leftWhole < rightWhole) {
+    return -1;
+  }
+  else if (leftWhole > rightWhole) {
+    return 1;
+  }
+  else {
+    if (leftFrac < rightFrac) {
+      return -1;
+    }
+    else if (leftFrac > rightFrac) {
+      return 1;
+    }
+    else {
+      return 0;
+    }
+  }
   // TODO: implement
   assert(0);
   return 0;
