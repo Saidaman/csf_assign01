@@ -80,44 +80,37 @@ int fixedpoint_is_zero(Fixedpoint val) {
 }
 
 int fixedpoint_is_err(Fixedpoint val) {
-  // TODO: implement
-  assert(0);
+  if (val.tags == error) return 1;
   return 0;
 }
 
 int fixedpoint_is_neg(Fixedpoint val) {
-  // TODO: implement
-  assert(0);
+  if (val.tags == vneg) return 1;
   return 0;
 }
 
 int fixedpoint_is_overflow_neg(Fixedpoint val) {
-  // TODO: implement
-  assert(0);
+  if (val.tags == negover) return 1;
   return 0;
 }
 
 int fixedpoint_is_overflow_pos(Fixedpoint val) {
-  // TODO: implement
-  assert(0);
+  if (val.tags == posover) return 1;
   return 0;
 }
 
 int fixedpoint_is_underflow_neg(Fixedpoint val) {
-  // TODO: implement
-  assert(0);
+  if (val.tags == negunder) return 1;
   return 0;
 }
 
 int fixedpoint_is_underflow_pos(Fixedpoint val) {
-  // TODO: implement
-  assert(0);
+  if (val.tags == posunder) return 1;
   return 0;
 }
 
 int fixedpoint_is_valid(Fixedpoint val) {
-  // TODO: implement
-  assert(0);
+  if ((val.tags == vnon) || (val.tags == vneg)) return 1;
   return 0;
 }
 
