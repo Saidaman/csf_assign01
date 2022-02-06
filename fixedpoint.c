@@ -74,6 +74,13 @@ int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
   uint64_t leftFrac = left.frac_part;
   uint64_t rightWhole = right.whole_part;
   uint64_t rightFrac = left.frac_part;
+  if (left.tags == vneg && right.tags == vnon) {
+    return -1;
+  }
+  else if (left.tags == vnon && right.tags == vneg) {
+    return 1;
+  }
+  
   if (leftWhole < rightWhole) {
     return -1;
   }
