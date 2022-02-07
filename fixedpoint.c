@@ -139,6 +139,7 @@ int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
       }
     }
   }
+  //they are of the same value
   return 0;
 
   // uint64_t leftWhole = left.whole_part;

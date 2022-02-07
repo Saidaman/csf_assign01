@@ -255,3 +255,27 @@ void test_is_err(TestObjs *objs) {
 }
 
 // TODO: implement more test functions
+
+void test_compare(TestObjs *objs) {
+  //check to see if 0 is returned (same Fixedpoint) using create
+  Fixedpoint zero_2 = fixedpoint_create(0x0UL);
+  ASSERT(fixedpoint_compare(objs->zero, zero_2));
+
+  //check to see if compare returns 0 for the same Fixedpoint with both whole and frac parts
+  Fixedpoint one_half_2 = fixedpoint_create2(0x0UL, 0x8000000000000000UL);
+  ASSERT(fixedpoint_compare(objs->one_half, one_half_2));
+
+  //check to see if -1 is returned when left = 1/4 and right = 1/2 (checking frac part)
+  ASSERT(fixedpoint_compare(objs->one_fourth, objs->one_half) == -1);
+
+  //check to see if 1 is returned when left = 1/2 and right = 1/4 (checking frac part)
+  ASSERT(fixedpoint_compare(objs->one_half, objs->one_fourth) == 1);
+
+  //check to see if comparison in whole parts works as expected (expecting -1)
+  Fixedpoint four_and_a_half = fixedpoint_create2(0x0000000000000004UL, 0x8000000000000000UL);
+  ASSERT(fixedpoint_compare(objs->one_half, four_and_a_half) == -1);
+
+  //check to see if comparison in whole parts works as expected (expecting 1)
+  Fixedpoint four_and_a_half = fixedpoint_create2(0x0000000000000004UL, 0x8000000000000000UL);
+  ASSERT(fixedpoint_compare(four_and_a_half, objs->one_fourth) == 1);
+}
