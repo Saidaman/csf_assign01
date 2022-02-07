@@ -276,6 +276,5 @@ void test_compare(TestObjs *objs) {
   ASSERT(fixedpoint_compare(objs->one_half, four_and_a_half) == -1);
 
   //check to see if comparison in whole parts works as expected (expecting 1)
-  Fixedpoint four_and_a_half = fixedpoint_create2(0x0000000000000004UL, 0x8000000000000000UL);
   ASSERT(fixedpoint_compare(four_and_a_half, objs->one_fourth) == 1);
 }
