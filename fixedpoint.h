@@ -255,17 +255,17 @@ int fixedpoint_is_valid(Fixedpoint val);
 //   of the Fixedpoint value
 char *fixedpoint_format_as_hex(Fixedpoint val);
 
-// Determines the comparison value of two unequal unsigned ints using bitwise operations.
-// Compares the most significant digit to see if it is present in the left or right
-// unsigned int.
-//
-// Parameters:
-// left - the whole part of the left Fixedpoint given as input in fixedpoint_compare
-// right - the whole part of the right Fixedpoint given as input in fixedpoint_compare
-//
-// Returns:
-//    1 if left > right
-//   -1 if left < right
-int whole_compare(uint64_t left, uint64_t right);
+// // Determines the comparison value of two unequal unsigned ints using bitwise operations.
+// // Compares the most significant digit to see if it is present in the left or right
+// // unsigned int.
+// //
+// // Parameters:
+// // left - the whole part of the left Fixedpoint given as input in fixedpoint_compare
+// // right - the whole part of the right Fixedpoint given as input in fixedpoint_compare
+// //
+// // Returns:
+// //    1 if left > right
+// //   -1 if left < right
+// int whole_compare(uint64_t left, uint64_t right);
 
 #endif // FIXEDPREC_H
