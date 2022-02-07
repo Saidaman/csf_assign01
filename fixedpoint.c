@@ -76,8 +76,23 @@ Fixedpoint fixedpoint_double(Fixedpoint val) {
 }
 
 int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
+<<<<<<< HEAD
   //need to make sure that they dont differ in signs
   if (left.tags == vneg && right.tags == vnon) {
+=======
+  uint64_t leftWhole = left.whole_part;
+  uint64_t leftFrac = left.frac_part;
+  uint64_t rightWhole = right.whole_part;
+  uint64_t rightFrac = left.frac_part;
+  if (left.tags == vneg && right.tags == vnon) {
+    return -1;
+  }
+  else if (left.tags == vnon && right.tags == vneg) {
+    return 1;
+  }
+  
+  if (leftWhole < rightWhole) {
+>>>>>>> 0d1c78a6806050737cccebd45583649753f71060
     return -1;
   } else if (left.tags == vnon && right.tags == vneg) {
     return 1;
