@@ -63,9 +63,9 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
 
     //Need to check for +- and -+
 
-    return result;
+    
   }
-  
+  return result;
 }
 
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
