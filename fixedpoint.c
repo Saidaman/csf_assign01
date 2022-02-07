@@ -40,7 +40,13 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
 }
 
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
-  // TODO: implement
+  u_int64_t result = 0;
+  //If they are both positive
+  if ((left.tags == vnon) && (right.tags == vnon)) {
+    result = 
+    int carry_val;
+    if ()
+  }
   assert(0);
   return DUMMY;
 }
@@ -70,23 +76,42 @@ Fixedpoint fixedpoint_double(Fixedpoint val) {
 }
 
 int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
-  uint64_t leftWhole = left.whole_part;
-  uint64_t leftFrac = left.frac_part;
-  uint64_t rightWhole = right.whole_part;
-  uint64_t rightFrac = left.frac_part;
-  if (leftWhole < rightWhole) {
+  //need to make sure that they dont differ in signs
+  if (left.tags == vneg && right.tags == vnon) {
     return -1;
-  }
-  else if (leftWhole > rightWhole) {
+  } else if (left.tags == vnon && right.tags == vneg) {
     return 1;
   }
-  else if (leftFrac < rightFrac) {
-    return -1;
+
+  uint64_t c_whole = left.whole_part^right.whole_part;
+  uint64_t c_frac = left.frac_part^right.frac_part;
+
+  //Think this will only work for positive values of left and right
+  if (c_whole) { //This means that the Fixedpoint values are not equivalent in the whole parts
+    //need to compare the most significant bit
+    return whole_compare(left.whole_part, right.whole_part);
   }
-  else if (leftFrac > rightFrac) {
-    return 1;
+  if (c_frac) { //Fixedpoint values are not equivalent in the frac parts
+    //compare most significant bit
+    return whole_compare(left.frac_part, right.frac_part);
   }
   return 0;
+}
+
+int whole_compare(uint64_t left, uint64_t right) { //helper for fixedpoint_compare
+  uint64_t difference = left^right;
+  difference |= difference >> 1;
+  difference |= difference >> 2;
+  difference |= difference >> 4;
+  difference |= difference >> 8;
+  difference |= difference >> 16;
+  difference |= difference >> 32;
+  difference ^= difference >> 1;
+  //checks if the most significant digit is in left
+  if (left&difference) {
+    return 1;
+  }
+  return -1;
 }
 
 int fixedpoint_is_zero(Fixedpoint val) {
