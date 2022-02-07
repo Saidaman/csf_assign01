@@ -75,9 +75,14 @@ Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
 }
 
 Fixedpoint fixedpoint_negate(Fixedpoint val) {
-  // TODO: implement
-  assert(0);
-  return DUMMY;
+  if (fixedpoint_is_zero(val)) {
+    val.tags = vnon;
+  } else if (val.tags == vnon) {
+      val.tags = vneg;
+  } else if (val.tags == vneg) {
+      val.tags = vnon;
+  }
+  return val;
 }
 
 Fixedpoint fixedpoint_halve(Fixedpoint val) {
