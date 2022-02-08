@@ -278,3 +278,9 @@ void test_compare(TestObjs *objs) {
   //check to see if comparison in whole parts works as expected (expecting 1)
   ASSERT(fixedpoint_compare(four_and_a_half, objs->one_fourth) == 1);
 }
+
+void test_halve(TestObjs *objs) {
+  //check to see if halving 1/2 produces 1/4 and no underflow
+  //ASSERT(fixedpoint_halve(objs->one_half) == objs->one_half);
+  ASSERT(fixedpoint_halve(objs->one_half).tags == vnon);
+}
