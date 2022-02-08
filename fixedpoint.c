@@ -50,7 +50,7 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
     }
     //need to see if 1 needs to be carried
     if ((result.tags == posover) || (result.tags == negover)) {
-      //is this the corect way to "carry" the 1?
+      //***is this the corect way to "carry" the 1?
       result.whole_part = result.whole_part + right.whole_part + 1;
     } else {
       result.whole_part = result.whole_part + right.whole_part;
@@ -60,11 +60,18 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
     } else { //for negative values
       result.tags = (result.whole_part < left.whole_part) ? negover : left.tags;
     }
+  }
 
     //Need to check for +- and -+
-
-    
+    //For +-
+  if ((left.tags == vnon) && (right.tags == vneg)) {
+    //if the Fixedpoints are the same but just opposite signs
+    if ((left.whole_part == right.whole_part) && (left.frac_part == right.frac_part)) {
+      return result;
+    } 
+    //how to even start?
   }
+  
   return result;
 }
 
@@ -85,9 +92,14 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
   if (val.whole_part % 2) { //check to see if whole_part is even
     val.whole_part = val.whole_part>>1;
     u_int64_t temp = val.frac_part>>1;
-
+    //what if there is underflow in the frac part/how do we know?
     return val; 
+  } else { //whole_part is odd and so we need to add something to the frac part?
+
   }
+
+
+
   val.whole_part = val.whole_part >> 1;
   val.frac_part = val.frac_part >> 1;
   if (val.tags == vnon) {
