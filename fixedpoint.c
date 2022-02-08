@@ -41,31 +41,34 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
 
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   Fixedpoint result = fixedpoint_create2(0,0);
-  uint64_t og_leftwhole = right.whole_part;
-  if (left.whole_part && left.frac_part && right.whole_part && right.frac_part) {
-    return result; //return 0 if both values of add are zero
-  }
-
-  if (left.tags == right.tags) { //if they are the same sign
+  uint64_t og_leftwhole = left.whole_part;
+  if ((left.whole_part == 0) &&
+      (left.frac_part == 0) &&
+      (right.whole_part == 0) &&
+      (right.frac_part == 0)) { //both left and right are 0
+      return result;
+    }
+  //if they are the same sign
+  if (left.tags == right.tags) {
     result.frac_part = left.frac_part + right.frac_part;
     if (left.tags == vnon) { //for non-negative values
-      result.tags = (result.frac_part < left.frac_part) ? posover : left.tags; //is this overflow for the frac parts?
+      result.tags = ((result.frac_part < left.frac_part) || (result.frac_part < left.frac_part)) ? posover : left.tags; 
     } else { //for negative values
-      result.tags = (result.frac_part < left.frac_part) ? negover : left.tags;
+      result.tags = ((result.frac_part < left.frac_part) || (result.frac_part < left.frac_part)) ? negover : left.tags;
     }
     //need to see if 1 needs to be carried
     if ((result.tags == posover) || (result.tags == negover)) { //need to carry the one
       //***is this the corect way to "carry" the 1?
-      left.whole_part += (0x0000000000000008);
-      if (right.whole_part < og_leftwhole) result.tags = result.tags; //only change this if logic of overflow in frac changes
+      left.whole_part += (0x0000000000000001);
+      if (left.whole_part < og_leftwhole) result.tags = result.tags; //compare to both right and left
       result.whole_part = left.whole_part + right.whole_part;
     } else {
       result.whole_part = left.whole_part + right.whole_part;
     }
     if (left.tags == vnon) { //for non-negative values, check whether overflow occured in whole (again)
-      result.tags = (result.whole_part < left.whole_part) ? posover : left.tags;
+      result.tags = ((result.whole_part < left.whole_part) || (result.whole_part < right.whole_part)) ? posover : left.tags;
     } else { //for negative values, check whether overflow occured
-      result.tags = (result.whole_part < left.whole_part) ? negover : left.tags;
+      result.tags = ((result.whole_part < left.whole_part) || (result.whole_part < right.whole_part)) ? negover : left.tags;
     }
   }
 
@@ -79,19 +82,22 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
 
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
   Fixedpoint result = fixedpoint_create2(0, 0);
-  if (left.whole_part && left.frac_part && right.whole_part && right.frac_part) {
+  if ((left.whole_part == 0) && 
+      (left.frac_part == 0) && 
+      (right.whole_part == 0) && 
+      (right.frac_part == 0)) { //both left and right are 0
     return result;
   }
   if ((left.tags == vnon) && (right.tags == vneg)) { //this is for the case left - (-right)
     right = fixedpoint_negate(right);
-    return fixedpoint_add(left, right);
+    return fixedpoint_add(left, right); // = left + right
   } else if ((left.tags == vneg) && (right.tags == vneg)) { // this is for -left - (-right) = -left + right
     right = fixedpoint_negate(right);
     return mag_sub(left, right);
   } else if ((left.tags = vnon) && (right.tags == vnon)) { //this is for left - right
     right = fixedpoint_negate(right);
     return mag_sub(left, right);
-  } else { // this if for -left - (+right)
+  } else { // this if for -left - (+right) = -left + (-right)
     right = fixedpoint_negate(right);
     return fixedpoint_add(left, right);
   }
@@ -106,15 +112,15 @@ Fixedpoint mag_sub(Fixedpoint left, Fixedpoint right) { //signs always differ
     sign_tag = left.tags;
     result.whole_part = left.whole_part - right.whole_part;
     result.frac_part = left.frac_part - right.frac_part;
-    if (result.frac_part > left.frac_part) {
-      result.whole_part = result.whole_part - (0x0000000000000008);
+    if ((result.frac_part > left.frac_part) || (result.frac_part > right.frac_part)) {
+      result.whole_part = result.whole_part - (0x0000000000000001);
     }
   } else if (right.whole_part > left.whole_part) {
     sign_tag = right.tags;
     result.whole_part = right.whole_part - left.whole_part;
-    result.frac_part = right.frac_part = left.frac_part;
-    if (result.frac_part > right.frac_part) {
-      result.whole_part = result.whole_part - (0x0000000000000008);
+    result.frac_part = right.frac_part - left.frac_part;
+    if ((result.frac_part > right.frac_part) || (result.frac_part > left.frac_part)) {
+      result.whole_part = result.whole_part - (0x0000000000000001);
     }
   } else if (left.frac_part > right.frac_part) {
     sign_tag = left.tags;
@@ -150,10 +156,10 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
     else if (!(val.frac_part % 2) && (val.tags == vneg)) {
       val.tags = negunder;
     }
-    val.frac_part = val.frac_part >> 1;
+    val.frac_part = val.frac_part >> 1; //10000000000
   } else { //whole_part is odd and so we need to add something to the frac part?
     val.whole_part = val.whole_part >> 1;
-    val.frac_part = val.frac_part + 0x8000000000000000;
+    val.frac_part = val.frac_part + 0x1000000000000000;
     if (!(val.frac_part % 2) && (val.tags == vnon)) {
       val.tags = posunder;
     }

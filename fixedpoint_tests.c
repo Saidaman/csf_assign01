@@ -281,6 +281,11 @@ void test_compare(TestObjs *objs) {
 
 void test_halve(TestObjs *objs) {
   //check to see if halving 1/2 produces 1/4 and no underflow
-  //ASSERT(fixedpoint_halve(objs->one_half) == objs->one_half);
+
+  printf("%llu", objs->one_half.whole_part);
+  printf("%llu", fixedpoint_halve(objs->one_half).frac_part);
+
+  ASSERT(fixedpoint_halve(objs->one_half).frac_part == objs->one_fourth.frac_part);
+  
   ASSERT(fixedpoint_halve(objs->one_half).tags == vnon);
 }
