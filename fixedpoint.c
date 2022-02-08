@@ -116,9 +116,9 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
 }
 
 Fixedpoint fixedpoint_double(Fixedpoint val) {
-  // TODO: implement
-  assert(0);
-  return DUMMY;
+  val.whole_part = val.whole_part << 1;
+  val.frac_part = val.frac_part << 1;
+  return val;
 }
 
 int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
