@@ -30,9 +30,13 @@ void test_add(TestObjs *objs);
 void test_sub(TestObjs *objs);
 void test_is_overflow_pos(TestObjs *objs);
 void test_is_err(TestObjs *objs);
-// TODO: add more test functions
 
-int main(int argc, char **argv) {
+    // TODO: add more test functions
+void test_compare(TestObjs *objs);
+void test_halve(TestObjs *objs);
+
+int main(int argc, char **argv)
+{
   // if a testname was specified on the command line, only that
   // test function will be executed
   if (argc > 1) {
@@ -50,6 +54,7 @@ int main(int argc, char **argv) {
   TEST(test_sub);
   TEST(test_is_overflow_pos);
   TEST(test_is_err);
+  
 
   // IMPORTANT: if you add additional test functions (which you should!),
   // make sure they are included here.  E.g., if you add a test function
@@ -58,6 +63,8 @@ int main(int argc, char **argv) {
   //   TEST(my_awesome_tests);
   //
   // here. This ensures that your test function will actually be executed.
+  TEST(test_compare);
+  TEST(test_halve);
 
   TEST_FINI();
 }
@@ -281,11 +288,15 @@ void test_compare(TestObjs *objs) {
 
 void test_halve(TestObjs *objs) {
   //check to see if halving 1/2 produces 1/4 and no underflow
+  //printf("Hello\n");
+  printf("%llx\n", objs->one_half.whole_part);
+  printf("%llx\n", objs->one_fourth.frac_part);
+  
 
-  printf("%llu", objs->one_half.whole_part);
-  printf("%llu", fixedpoint_halve(objs->one_half).frac_part);
+  ASSERT(fixedpoint_halve(objs->one_half).tags == vnon);
+  printf("%llx\n", fixedpoint_halve(objs->one_half).frac_part);
 
   ASSERT(fixedpoint_halve(objs->one_half).frac_part == objs->one_fourth.frac_part);
   
-  ASSERT(fixedpoint_halve(objs->one_half).tags == vnon);
+  
 }
