@@ -264,13 +264,14 @@ void test_is_err(TestObjs *objs) {
 // TODO: implement more test functions
 
 void test_compare(TestObjs *objs) {
-  //check to see if 0 is returned (same Fixedpoint) using create
-  Fixedpoint zero_2 = fixedpoint_create(0x0UL);
-  ASSERT(fixedpoint_compare(objs->zero, zero_2));
+  // //check to see if 0 is returned (same Fixedpoint) using create
+  // Fixedpoint zero_2 = fixedpoint_create(0x0UL);
+  // ASSERT(fixedpoint_compare(objs->zero.frac_part, zero_2.frac_part);
 
   //check to see if compare returns 0 for the same Fixedpoint with both whole and frac parts
   Fixedpoint one_half_2 = fixedpoint_create2(0x0UL, 0x8000000000000000UL);
-  ASSERT(fixedpoint_compare(objs->one_half, one_half_2));
+  Fixedpoint one_half_3 = fixedpoint_create2(0, 0x10);
+  ASSERT(fixedpoint_compare(objs->one_half, one_half_3));
 
   //check to see if -1 is returned when left = 1/4 and right = 1/2 (checking frac part)
   ASSERT(fixedpoint_compare(objs->one_fourth, objs->one_half) == -1);
@@ -291,12 +292,18 @@ void test_halve(TestObjs *objs) {
   //printf("Hello\n");
   printf("%llx\n", objs->one_half.whole_part);
   printf("%llx\n", objs->one_fourth.frac_part);
-  
+  printf("hi\n");
 
   ASSERT(fixedpoint_halve(objs->one_half).tags == vnon);
   printf("%llx\n", fixedpoint_halve(objs->one_half).frac_part);
 
-  ASSERT(fixedpoint_halve(objs->one_half).frac_part == objs->one_fourth.frac_part);
-  
-  
+  //Testing 4.5 halve, result should be 2.25
+  Fixedpoint four_and_a_half = fixedpoint_create2(0x0000000000000004UL, 0x8000000000000000UL);
+  Fixedpoint two_and_one_fourth = fixedpoint_create2(0x0000000000000002UL, 0x4000000000000000UL);
+
+  printf("%llx\n", fixedpoint_halve(four_and_a_half).whole_part);
+  printf("%llx\n", two_and_one_fourth.whole_part);
+
+  ASSERT(fixedpoint_halve(four_and_a_half).whole_part == two_and_one_fourth.whole_part);
+  ASSERT(fixedpoint_halve(four_and_a_half).frac_part == two_and_one_fourth.frac_part);
 }

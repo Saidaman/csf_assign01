@@ -147,29 +147,25 @@ Fixedpoint mag_sub(Fixedpoint left, Fixedpoint right) { //signs always differ
 }
 
 Fixedpoint fixedpoint_halve(Fixedpoint val) {
-  // Try to use bitwise right shift operator
-  if (val.whole_part % 2 == 0) { //check to see if whole_part is even, ie doesn't have falling 1
-    val.whole_part = val.whole_part>>1;
-    if ((val.frac_part % 2 != 0) && (val.tags == vnon)) { //frac part cant be divided evently, ie loss of precision
+  if (val.frac_part & 1){
+     if (val.tags == vneg) {
+      val.tags = negunder;
+    } else {
       val.tags = posunder;
     }
-    else if ((val.frac_part % 2 != 0) && (val.tags == vneg)) {
-      val.tags = negunder;
-    }
-    val.frac_part = val.frac_part>>1;
-  } else { //whole_part is odd and so we need 1 to carry over to frac part
-    val.whole_part = val.whole_part>>1;
+  }
+
+  if (val.whole_part&1) { //if odd
+    val.whole_part = val.whole_part >> 1;
+    val.frac_part = val.frac_part >> 1;
     val.frac_part = val.frac_part + 0x8000000000000000;
-    if ((val.frac_part % 2 != 0) && (val.tags == vnon)) {
-      val.tags = posunder;
-    }
-    else if ((val.frac_part % 2 != 0) && (val.tags == vneg)) {
-      val.tags = negunder;
-    }
+  }
+  else { //if even
+    val.whole_part = val.whole_part >> 1;
     val.frac_part = val.frac_part >> 1;
   }
-return val;
-}
+  return val;
+  }
 
 Fixedpoint fixedpoint_double(Fixedpoint val) {
   uint64_t ogWhole = val.whole_part;
