@@ -96,23 +96,25 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
   // Try to use bitwise right shift operator
   if (val.whole_part % 2) { //check to see if whole_part is even
     val.whole_part = val.whole_part>>1;
-    u_int64_t temp = val.frac_part>>1;
-    //what if there is underflow in the frac part/how do we know?
-    return val; 
+    if (!(val.frac_part % 2) && (val.tags == vnon)) {
+      val.tags == posunder;
+    }
+    else if (!(val.frac_part % 2) && (val.tags == vneg)) {
+      val.tags == negunder;
+    }
+    val.frac_part = val.frac_part >> 1;
   } else { //whole_part is odd and so we need to add something to the frac part?
-
+    val.whole_part = val.whole_part >> 1;
+    val.frac_part = val.frac_part + 0x800000000000000;
+    if (!(val.frac_part % 2) && (val.tags == vnon)) {
+      val.tags == posunder;
+    }
+    else if (!(val.frac_part % 2) && (val.tags == vneg)) {
+      val.tags == negunder;
+    }
+    val.frac_part = val.frac_part >> 1;
   }
-
-
-
-  val.whole_part = val.whole_part >> 1;
-  val.frac_part = val.frac_part >> 1;
-  if (val.tags == vnon) {
-    val.tags == posunder;
-  } else if (val.tags == vneg) {
-    val.tags == negunder;
-  }
-  return val;
+return val;
 }
 
 Fixedpoint fixedpoint_double(Fixedpoint val) {
@@ -129,7 +131,7 @@ Fixedpoint fixedpoint_double(Fixedpoint val) {
   return val;
 }
 
-int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
+int fixedpoint_compare(Fixedpoint left, Fixedpoint right) { 
   //if they differ in signs (-+) or (+-)
   if ((left.tags == vneg) && (right.tags == vnon)) {
     return -1; //left < right (- < +)
