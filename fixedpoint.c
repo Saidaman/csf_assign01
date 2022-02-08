@@ -41,50 +41,98 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
 
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   Fixedpoint result = fixedpoint_create2(0,0);
+  uint64_t og_leftwhole = right.whole_part;
+  if (left.whole_part && left.frac_part && right.whole_part && right.frac_part) {
+    return result; //return 0 if both values of add are zero
+  }
+
   if (left.tags == right.tags) { //if they are the same sign
-    result.frac_part = result.frac_part + right.frac_part;
+    result.frac_part = left.frac_part + right.frac_part;
     if (left.tags == vnon) { //for non-negative values
-      result.tags = (result.frac_part < left.frac_part) ? posover : left.tags;
+      result.tags = (result.frac_part < left.frac_part) ? posover : left.tags; //is this overflow for the frac parts?
     } else { //for negative values
       result.tags = (result.frac_part < left.frac_part) ? negover : left.tags;
     }
     //need to see if 1 needs to be carried
-    if ((result.tags == posover) || (result.tags == negover)) {
+    if ((result.tags == posover) || (result.tags == negover)) { //need to carry the one
       //***is this the corect way to "carry" the 1?
-      result.whole_part = result.whole_part + right.whole_part + 1;
+      left.whole_part += (0x0000000000000008);
+      if (right.whole_part < og_leftwhole) result.tags = result.tags; //only change this if logic of overflow in frac changes
+      result.whole_part = left.whole_part + right.whole_part;
     } else {
-      result.whole_part = result.whole_part + right.whole_part;
+      result.whole_part = left.whole_part + right.whole_part;
     }
-    if (left.tags == vnon) { //for non-negative values
+    if (left.tags == vnon) { //for non-negative values, check whether overflow occured in whole (again)
       result.tags = (result.whole_part < left.whole_part) ? posover : left.tags;
-    } else { //for negative values
+    } else { //for negative values, check whether overflow occured
       result.tags = (result.whole_part < left.whole_part) ? negover : left.tags;
     }
   }
 
     //Need to check for +- and -+
-    //For +-
-  if ((left.tags == vnon) && (right.tags == vneg)) {
-    //if the Fixedpoints are the same but just opposite signs
-    if ((left.whole_part == right.whole_part) && (left.frac_part == right.frac_part)) {
-      return result;
-    } 
-    //how to even start?
+  if (((left.tags == vnon) && (right.tags == vneg)) ||
+      ((left.tags == vneg) && (right.tags == vnon))) {
+    return mag_sub(left, right);
   }
-  
   return result;
 }
 
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
-  // TODO: implement
-  assert(0);
-  return DUMMY;
+  Fixedpoint result = fixedpoint_create2(0, 0);
+  if (left.whole_part && left.frac_part && right.whole_part && right.frac_part) {
+    return result;
+  }
+  if ((left.tags == vnon) && (right.tags == vneg)) { //this is for the case left - (-right)
+    right = fixedpoint_negate(right);
+    return fixedpoint_add(left, right);
+  } else if ((left.tags == vneg) && (right.tags == vneg)) { // this is for -left - (-right) = -left + right
+    right = fixedpoint_negate(right);
+    return mag_sub(left, right);
+  } else if ((left.tags = vnon) && (right.tags == vnon)) { //this is for left - right
+    right = fixedpoint_negate(right);
+    return mag_sub(left, right);
+  } else { // this if for -left - (+right)
+    right = fixedpoint_negate(right);
+    return fixedpoint_add(left, right);
+  }
+  return result;
 }
 
-Fixedpoint fixedpoint_negate(Fixedpoint val) {
-  if (fixedpoint_is_zero(val)) {
-    val.tags = vnon;
-  } else if (val.tags == vnon) {
+Fixedpoint mag_sub(Fixedpoint left, Fixedpoint right) { //signs always differ
+  Fixedpoint result = fixedpoint_create2(0, 0);
+  int sign_tag = 0;
+  //get the sign of the fixedpoint with the higher magnitude
+  if (left.whole_part > right.whole_part) {
+    sign_tag = left.tags;
+    result.whole_part = left.whole_part - right.whole_part;
+    result.frac_part = left.frac_part - right.frac_part;
+    if (result.frac_part > left.frac_part) {
+      result.whole_part = result.whole_part - (0x0000000000000008);
+    }
+  } else if (right.whole_part > left.whole_part) {
+    sign_tag = right.tags;
+    result.whole_part = right.whole_part - left.whole_part;
+    result.frac_part = right.frac_part = left.frac_part;
+    if (result.frac_part > right.frac_part) {
+      result.whole_part = result.whole_part - (0x0000000000000008);
+    }
+  } else if (left.frac_part > right.frac_part) {
+    sign_tag = left.tags;
+    result.frac_part = left.frac_part - right.frac_part;
+  } else if (right.frac_part > left.frac_part) {
+    sign_tag = right.tags;
+    result.frac_part = right.frac_part - left.frac_part;
+  }
+  result.tags = sign_tag;
+  return result;
+}
+
+  Fixedpoint fixedpoint_negate(Fixedpoint val)
+  {
+    if (fixedpoint_is_zero(val))
+    {
+      val.tags = vnon;
+    } else if (val.tags == vnon) {
       val.tags = vneg;
   } else if (val.tags == vneg) {
       val.tags = vnon;
@@ -105,7 +153,7 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
     val.frac_part = val.frac_part >> 1;
   } else { //whole_part is odd and so we need to add something to the frac part?
     val.whole_part = val.whole_part >> 1;
-    val.frac_part = val.frac_part + 0x800000000000000;
+    val.frac_part = val.frac_part + 0x8000000000000000;
     if (!(val.frac_part % 2) && (val.tags == vnon)) {
       val.tags == posunder;
     }
@@ -168,54 +216,7 @@ int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
   }
   //they are of the same value
   return 0;
-
-  // uint64_t leftWhole = left.whole_part;
-  // uint64_t leftFrac = left.frac_part;
-  // uint64_t rightWhole = right.whole_part;
-  // uint64_t rightFrac = left.frac_part;
-  // if (left.tags == vneg && right.tags == vnon) {
-  //   return -1;
-  // }
-  // else if (left.tags == vnon && right.tags == vneg) {
-  //   return 1;
-  // }
-  
-  // if (leftWhole < rightWhole) {
-  //   return -1;
-  // } else if (left.tags == vnon && right.tags == vneg) {
-  //   return 1;
-  // }
-
-  // uint64_t c_whole = left.whole_part^right.whole_part;
-  // uint64_t c_frac = left.frac_part^right.frac_part;
-
-  // //Think this will only work for positive values of left and right
-  // if (c_whole) { //This means that the Fixedpoint values are not equivalent in the whole parts
-  //   //need to compare the most significant bit
-  //   return whole_compare(left.whole_part, right.whole_part);
-  // }
-  // if (c_frac) { //Fixedpoint values are not equivalent in the frac parts
-  //   //compare most significant bit
-  //   return whole_compare(left.frac_part, right.frac_part);
-  // }
-  // return 0;
 }
-
-// int whole_compare(uint64_t left, uint64_t right) { //helper for fixedpoint_compare
-//   uint64_t difference = left^right;
-//   difference |= difference >> 1;
-//   difference |= difference >> 2;
-//   difference |= difference >> 4;
-//   difference |= difference >> 8;
-//   difference |= difference >> 16;
-//   difference |= difference >> 32;
-//   difference ^= difference >> 1;
-//   //checks if the most significant digit is in left
-//   if (left&difference) {
-//     return 1;
-//   }
-//   return -1;
-// }
 
 int fixedpoint_is_zero(Fixedpoint val) {
   return ((val.whole_part == 0) && (val.frac_part == 0));
