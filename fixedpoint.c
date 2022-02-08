@@ -145,20 +145,20 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
   if (val.whole_part % 2) { //check to see if whole_part is even
     val.whole_part = val.whole_part>>1;
     if (!(val.frac_part % 2) && (val.tags == vnon)) {
-      val.tags == posunder;
+      val.tags = posunder;
     }
     else if (!(val.frac_part % 2) && (val.tags == vneg)) {
-      val.tags == negunder;
+      val.tags = negunder;
     }
     val.frac_part = val.frac_part >> 1;
   } else { //whole_part is odd and so we need to add something to the frac part?
     val.whole_part = val.whole_part >> 1;
     val.frac_part = val.frac_part + 0x8000000000000000;
     if (!(val.frac_part % 2) && (val.tags == vnon)) {
-      val.tags == posunder;
+      val.tags = posunder;
     }
     else if (!(val.frac_part % 2) && (val.tags == vneg)) {
-      val.tags == negunder;
+      val.tags = negunder;
     }
     val.frac_part = val.frac_part >> 1;
   }
