@@ -168,17 +168,47 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
   }
 
 Fixedpoint fixedpoint_double(Fixedpoint val) {
-  uint64_t ogWhole = val.whole_part;
-  uint64_t ogFrac = val.frac_part;
-  val.whole_part = val.whole_part << 1;
-  val.frac_part = val.frac_part << 1;
-  // idea is that overflow would cause value to wrap around on the number line and be a smaller value than original
-  int wholeOverflow = val.whole_part < ogWhole; //int as a boolean
-  int fracOverflow = val.frac_part < ogFrac;
-  if (wholeOverflow || fracOverflow) {
-    val.tags = posover;
-  }
-  return val;
+  //need to make sure to correctly show overflow in add
+  return fixedpoint_add(val,val);
+
+  // uint64_t result_frac = val.frac_part<<1;
+  // uint64_t og_wholepart = val.whole_part;
+
+  // if (result_frac < val.frac_part) { //need to carry one
+  //   val.whole_part = val.whole_part + 0x10000000000000000;
+  //   if (val.whole_part < og_wholepart) {
+  //     if (val.tags = vnon) val.tags = posover;
+  //     if (val.tags = vneg) val.tags = negover;
+  //   }
+  //   og_wholepart = val.whole_part;
+  //   val.whole_part = val.whole_part<<1;
+  //   if(val.whole_part < og_wholepart) {
+  //     if (val.tags = vnon) val.tags = posover;
+  //     if (val.tags = vneg) val.tags = negover;
+  //   }
+  // } else {
+  //   val.whole_part = val.whole_part << 1;
+  //   if (val.whole_part < og_wholepart)
+  //   {
+  //     if (val.tags = vnon)
+  //       val.tags = posover;
+  //     if (val.tags = vneg)
+  //       val.tags = negover;
+  //   }
+  //   return val;
+  // }
+
+  // uint64_t ogWhole = val.whole_part;
+  // uint64_t ogFrac = val.frac_part;
+  // val.whole_part = val.whole_part << 1;
+  // val.frac_part = val.frac_part << 1;
+  // // idea is that overflow would cause value to wrap around on the number line and be a smaller value than original
+  // int wholeOverflow = val.whole_part < ogWhole; //int as a boolean
+  // int fracOverflow = val.frac_part < ogFrac;
+  // if (wholeOverflow || fracOverflow) {
+  //   val.tags = posover;
+  // }
+  // return val;
 }
 
 int fixedpoint_compare(Fixedpoint left, Fixedpoint right) { 
