@@ -116,8 +116,16 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
 }
 
 Fixedpoint fixedpoint_double(Fixedpoint val) {
+  uint64_t ogWhole = val.whole_part;
+  uint64_t ogFrac = val.frac_part;
   val.whole_part = val.whole_part << 1;
   val.frac_part = val.frac_part << 1;
+  // idea is that overflow would cause value to wrap around on the number line and be a smaller value than original
+  int wholeOverflow = val.whole_part < ogWhole; //int as a boolean
+  int fracOverflow = val.frac_part < ogFrac;
+  if (wholeOverflow || fracOverflow) {
+    val.tags = posover;
+  }
   return val;
 }
 
