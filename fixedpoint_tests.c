@@ -128,6 +128,26 @@ void test_create_from_hex(TestObjs *objs) {
   ASSERT(0xf6a5865UL == fixedpoint_whole_part(val1));
 
   ASSERT(0x00f2000000000000UL == fixedpoint_frac_part(val1));
+
+  //invalid number of decimal points
+  Fixedpoint val2 = fixedpoint_create_from_hex(".f6a5865.00f2");
+  ASSERT(fixedpoint_is_err(val2));
+
+  //invalid hex characters in the string
+  Fixedpoint val3 = fixedpoint_create_from_hex("z6a5&65.0hf2");
+  ASSERT(fixedpoint_is_err(val3));
+
+  //invalid number of hex characters on the side after the decimal point (> 16)
+  Fixedpoint val4 = fixedpoint_create_from_hex("f6a5865.00000000000000001");
+  ASSERT(fixedpoint_is_err(val4));
+
+  //invalid number of hex characters on the side before the decimal point (> 16)
+  Fixedpoint val5 = fixedpoint_create_from_hex("00000000000000000001.00f2");
+  ASSERT(fixedpoint_is_err(val5));
+
+  //hex string has sign at invalid location in string
+  Fixedpoint val6 = fixedpoint_create_from_hex("3cc95b.980ac-");
+  ASSERT(fixedpoint_is_err(val6));
 }
 
 void test_format_as_hex(TestObjs *objs) {

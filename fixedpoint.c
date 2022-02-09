@@ -29,30 +29,34 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
 }
 
 int valid_hex(const char *hex) {
-   uint64_t points = 0; // number of decimal points
-   uint64_t valid_chars_in_each_half[2] = {0, 0}; // number of valid hex characters in each half of string
-   int which_half = 0; // indicator of which half of string (before/after decimal point)
-   uint64_t length = strlen(hex); // length of string
-   int valid = 1; // return variable;
+  uint64_t points = 0; // number of decimal points
+  uint64_t valid_chars_in_each_half[2] = {0, 0}; // number of valid hex characters in each half of string
+  int which_half = 0; // indicator of which half of string (before/after decimal point)
+  uint64_t length = strlen(hex); // length of string
+  int valid = 1; // return variable;
    
-   for (uint64_t i = 0; i < length; i++) {
-      uint64_t is_valid_char = (hex[i] >= '0' && hex[i] <= '9') || (hex[i] >= 'a' && hex[i] <= 'f') || (hex[i] >= 'A' && hex[i] <= 'F');
-      if (hex[i] == '.') {
-         points++;
-         which_half = 1; // switches to second half valid hex char count
-      }
-      if (!(is_valid_char || hex[i] == '-' || hex[i] == '.')) {
-         valid = 0; // no longer a valid hex string
-      }
-      if (is_valid_char) {
-         valid_chars_in_each_half[which_half] += 1; // counting number of valid hex characters in given half of string
-      }
-   }
-   if (valid_chars_in_each_half[0] > 16 || valid_chars_in_each_half[1] > 16 || points > 1) {
+  for (uint64_t i = 0; i < length; i++) {
+    uint64_t is_valid_char = (hex[i] >= '0' && hex[i] <= '9') || (hex[i] >= 'a' && hex[i] <= 'f') || (hex[i] >= 'A' && hex[i] <= 'F');
+    if (hex[i] == '.') {
+      points++;
+      which_half = 1; // switches to second half valid hex char count
+    }
+
+    if (hex[i] == '-' && i > 0) { // sign can only be at the start of the string
+      valid = 0;
+    }
+
+    if (!(hex[i] == '.' || is_valid_char || hex[i] == '-')) {
       valid = 0; // no longer a valid hex string
-   }
-   
-   return valid;
+    }
+    if (is_valid_char) {
+      valid_chars_in_each_half[which_half] += 1; // counting number of valid hex characters in given half of string
+    }
+  }
+  if (valid_chars_in_each_half[0] > 16 || valid_chars_in_each_half[1] > 16 || points > 1) {
+    valid = 0; // no longer a valid hex string
+  } 
+  return valid;
 }
 
 Fixedpoint create_fixedpoint_in_hex(uint64_t points, uint64_t point_index, int negated, const char *hex) {
