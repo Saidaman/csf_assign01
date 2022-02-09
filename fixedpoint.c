@@ -181,7 +181,7 @@ Fixedpoint fixedpoint_double(Fixedpoint val) {
     result.tags = val.tags;
   }
   if (result_frac < val.frac_part) {
-    result_whole++;
+    result_whole += 0x0000000000000001;
   }
   result.whole_part = result_whole;
   result.frac_part = result_frac;
