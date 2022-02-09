@@ -133,9 +133,9 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   if (left.tags == right.tags) {
     result.frac_part = left.frac_part + right.frac_part;
     if (left.tags == vnon) { //for non-negative values
-      result.tags = ((result.frac_part < left.frac_part) || (result.frac_part < right.frac_part)) ? -1 : left.tags; 
+      result.tags = ((result.frac_part < left.frac_part) || (result.frac_part < right.frac_part)) ? 7 : left.tags; 
     } else { //for negative values
-      result.tags = ((result.frac_part < left.frac_part) || (result.frac_part < right.frac_part)) ? -1 : left.tags;
+      result.tags = ((result.frac_part < left.frac_part) || (result.frac_part < right.frac_part)) ? 7 : left.tags;
     }
     int fraction_overflow = (result.tags == 7) ? 1 : 0;
     //need to see if 1 needs to be carried
