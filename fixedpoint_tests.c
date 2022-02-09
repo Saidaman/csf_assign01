@@ -215,13 +215,21 @@ void test_sub(TestObjs *objs) {
   (void) objs;
 
   Fixedpoint lhs, rhs, diff;
-
+  /*
   lhs = fixedpoint_create_from_hex("-ccf35aa3a04a3b.b105");
   rhs = fixedpoint_create_from_hex("f676e8.58");
   diff = fixedpoint_sub(lhs, rhs);
   ASSERT(fixedpoint_is_neg(diff));
   ASSERT(0xccf35aa496c124UL == fixedpoint_whole_part(diff));
   ASSERT(0x0905000000000000UL == fixedpoint_frac_part(diff));
+  */
+
+  lhs = fixedpoint_create(0x659UL);
+  rhs = fixedpoint_negate(fixedpoint_create(0xf75UL));
+  diff = fixedpoint_sub(lhs, rhs);
+  ASSERT(!fixedpoint_is_neg(diff));
+  ASSERT(0x15ceUL == fixedpoint_whole_part(diff));
+  ASSERT(0x0UL == fixedpoint_frac_part(diff));
 }
 
 void test_is_overflow_pos(TestObjs *objs) {
