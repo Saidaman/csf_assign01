@@ -292,8 +292,8 @@ void test_add(TestObjs *objs) {
 
   //complex negative add case: adding fractions for a fractional result
   lhs = fixedpoint_negate(objs->one);
-  Fixedpoint add_temp = objs->one_fourth;
-  Fixedpoint temp_sum = fixedpoint_add(lhs, add_temp);
+  add_temp = objs->one_fourth;
+  temp_sum = fixedpoint_add(lhs, add_temp);
   rhs = objs -> one_fourth;
   sum = fixedpoint_add(temp_sum, rhs);
   ASSERT(fixedpoint_compare(sum, fixedpoint_negate(objs->one_half)) == 0);
