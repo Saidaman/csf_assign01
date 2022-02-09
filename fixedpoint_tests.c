@@ -258,10 +258,22 @@ void test_sub(TestObjs *objs) {
   ASSERT(fixedpoint_is_valid(diff));
   ASSERT(fixedpoint_compare(diff, objs->zero) == 0);
 
-  //-b0fc7e0.e993 - caf18a60.2c70 = -d6015241.1603 (random case)
+  //-b0fc7e0.e993 - caf18a60.2c70 = -d6015241.1603 (random case) - +
   lhs = fixedpoint_create_from_hex("-b0fc7e0.e993");
   rhs = fixedpoint_create_from_hex("-caf18a60.2c70");
   diff = fixedpoint_create_from_hex("-d6015241.1603");
+  ASSERT(fixedpoint_compare(fixedpoint_sub(lhs, rhs), diff) == 0);
+
+  //9c593ed1f34d.8938ecf70cd - 6861ca8a2.70f12f2e3e0b902 = 9c52b8b54aab.1847bdc8cec46fe (random case) + +
+  lhs = fixedpoint_create_from_hex("9c593ed1f34d.8938ecf70cd");
+  rhs = fixedpoint_create_from_hex("6861ca8a2.70f12f2e3e0b902");
+  diff = fixedpoint_create_from_hex("9c52b8b54aab.1847bdc8cec46fe");
+  ASSERT(fixedpoint_compare(fixedpoint_sub(lhs, rhs), diff) == 0);
+
+  //-b6e9bcaa6.405ab60434a - -f32cd8bf.9d9bf03380008 = -a7b6ef1e6.a2bec5d0b49f8 (random case) - -
+  lhs = fixedpoint_create_from_hex("-b6e9bcaa6.405ab60434a");
+  rhs = fixedpoint_create_from_hex("-f32cd8bf.9d9bf03380008");
+  diff = fixedpoint_create_from_hex("-a7b6ef1e6.a2bec5d0b49f8");
   ASSERT(fixedpoint_compare(fixedpoint_sub(lhs, rhs), diff) == 0);
 
   // 0x659UL - 0xf75UL = 0x15ceUL (random case)
