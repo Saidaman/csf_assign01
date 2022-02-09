@@ -12,6 +12,7 @@ typedef struct {
   Fixedpoint large1;
   Fixedpoint large2;
   Fixedpoint max;
+  Fixedpoint min;
 
   // TODO: add more objects to the test fixture
 } TestObjs;
@@ -78,7 +79,9 @@ TestObjs *setup(void) {
   objs->one_fourth = fixedpoint_create2(0UL, 0x4000000000000000UL);
   objs->large1 = fixedpoint_create2(0x4b19efceaUL, 0xec9a1e2418UL);
   objs->large2 = fixedpoint_create2(0xfcbf3d5UL, 0x4d1a23c24fafUL);
-  objs->max = fixedpoint_create2(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL); //this was already there?
+  objs->max = fixedpoint_create2(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL);
+  objs->min = fixedpoint_create2(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL);
+  objs->min = fixedpoint_negate(objs->min);
 
   return objs;
 }
@@ -192,23 +195,77 @@ void test_add(TestObjs *objs) {
 
   Fixedpoint lhs, rhs, sum;
 
-  // lhs = fixedpoint_create_from_hex("-c7252a193ae07.7a51de9ea0538c5");
-  // rhs = fixedpoint_create_from_hex("d09079.1e6d601");
-  // sum = fixedpoint_add(lhs, rhs);
-  //ASSERT(fixedpoint_is_neg(sum));
-  //ASSERT(0xc7252a0c31d8eUL == fixedpoint_whole_part(sum));
-  //ASSERT(0x5be47e8ea0538c50UL == fixedpoint_frac_part(sum));
-
-  lhs = fixedpoint_create(0x659UL);
-  rhs = fixedpoint_create2(0xfcbf3d5UL, 0x4d1a23c24fafUL);
-  rhs = fixedpoint_negate(rhs);
+  lhs = fixedpoint_create_from_hex("-c7252a193ae07.7a51de9ea0538c5");
+  rhs = fixedpoint_create_from_hex("d09079.1e6d601");
   sum = fixedpoint_add(lhs, rhs);
-  printf("%llu\n", sum.whole_part);
-  printf("%llu\n", sum.frac_part);
-  ASSERT(0xFCBED7CUL == sum.whole_part);
-  // FCBED7CUL
-  // 00004D1A23C24FAFUL
+  ASSERT(fixedpoint_is_neg(sum));
+  ASSERT(0xc7252a0c31d8eUL == fixedpoint_whole_part(sum));
+  ASSERT(0x5be47e8ea0538c50UL == fixedpoint_frac_part(sum));
 
+  //adding 0 to 0 should result in 0
+  lhs = objs -> zero;
+  rhs = objs -> zero;
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_zero(sum));
+
+  //adding 1 to max should result in positive overflow
+  lhs = objs -> max;
+  rhs = objs -> one;
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_overflow_pos(sum));
+
+  //adding max to min should result in 0
+  lhs = objs -> max;
+  rhs = objs -> min;
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_zero(sum));
+
+  //adding 1 to -1 should result in 0
+  lhs = fixedpoint_negate(objs->one);
+  rhs = objs -> one;
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_zero(sum));
+
+  //adding -1 to 1 should result in 0 (similar to test above, so testing commutativity of addition)
+  lhs = objs -> one;
+  rhs = fixedpoint_negate(objs->one);
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_zero(sum));
+
+  //adding -1 to -1 should result in -2
+  lhs = fixedpoint_negate(objs->one);
+  rhs = fixedpoint_negate(objs->one);
+  sum = fixedpoint_add(lhs, rhs);
+  Fixedpoint neg_two = fixedpoint_negate(fixedpoint_create(2UL));
+  ASSERT(fixedpoint_compare(neg_two, sum) == 0);
+
+  //adding 1 to 1 should result in 2
+  lhs = objs -> one;
+  rhs = objs -> one;
+  sum = fixedpoint_add(lhs, rhs);
+  Fixedpoint two = fixedpoint_create(2UL);
+  ASSERT(fixedpoint_compare(two, sum) == 0);
+
+  //-3cc95b.980ac + b82b0007.e9e240 = b7ee36ac.51d780
+  lhs = fixedpoint_create_from_hex("-3cc95b.980ac");
+  rhs = fixedpoint_create_from_hex("b82b0007.e9e240");
+  sum = fixedpoint_add(lhs, rhs);
+  Fixedpoint expSum = fixedpoint_create_from_hex("b7ee36ac.51d780"); // expected sum
+  ASSERT(fixedpoint_compare(sum, expSum) == 0);
+
+  //-914b7.b + -3f02c38a169c5f.a0560 = -3f02c38a1fb117.50560
+  lhs = fixedpoint_create_from_hex("-914b7.b");
+  rhs = fixedpoint_create_from_hex("-3f02c38a169c5f.a0560");
+  sum = fixedpoint_add(lhs, rhs);
+  Fixedpoint expSum2 = fixedpoint_create_from_hex("-3f02c38a1fb117.50560"); // expected sum
+  ASSERT(fixedpoint_compare(sum, expSum2) == 0);
+
+  //-eb92754a446478.51892e29e2eb08 + -f42c161118bd8.bf = -fad536ab55f051.10892e29e2eb08
+  lhs = fixedpoint_create_from_hex("-eb92754a446478.51892e29e2eb08");
+  rhs = fixedpoint_create_from_hex("-f42c161118bd8.bf");
+  sum = fixedpoint_add(lhs, rhs);
+  Fixedpoint expSum3 = fixedpoint_create_from_hex("-fad536ab55f051.10892e29e2eb08"); // expected sum
+  ASSERT(fixedpoint_compare(sum, expSum3) == 0);
 }
 
 void test_sub(TestObjs *objs) {
