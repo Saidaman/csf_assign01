@@ -11,4 +11,4 @@ Saidaman Earla Contributions:
 Prepared GitHub repo, mostly worked on fixedpoint arithmetic functions like add, subtract, halve, double.
 
 Shayan Hossain Contributions:
-Mostly worked on hex functions like create_from_hex, format_as_hex, and did finishing touches (stylistic consistency, etc.)
+Mostly worked on hex functions like create_from_hex, format_as_hex, and did finishing touches (stylistic consistency, etc.).
