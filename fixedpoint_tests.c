@@ -215,23 +215,61 @@ void test_sub(TestObjs *objs) {
   (void) objs;
 
   Fixedpoint lhs, rhs, diff;
-  /*
-  lhs = fixedpoint_create_from_hex("-ccf35aa3a04a3b.b105");
-  rhs = fixedpoint_create_from_hex("f676e8.58");
-  diff = fixedpoint_sub(lhs, rhs);
-  ASSERT(fixedpoint_is_neg(diff));
-  ASSERT(0xccf35aa496c124UL == fixedpoint_whole_part(diff));
-  ASSERT(0x0905000000000000UL == fixedpoint_frac_part(diff));
-  */
 
+  //edge case: 0 - 0, also tests is_zero
+  lhs = fixedpoint_create(0x0UL);
+  rhs = fixedpoint_create(0x0UL);
+  diff = fixedpoint_sub(lhs, rhs);
+  ASSERT(fixedpoint_is_zero(diff));
+  ASSERT(fixedpoint_compare(diff, objs->zero) == 0);
+
+  //edge case max - 0 //test case + +
+  lhs = objs->max;
+  rhs = fixedpoint_create(0x0UL);
+  diff = fixedpoint_sub(lhs, rhs);
+  ASSERT(fixedpoint_is_valid(diff));
+  ASSERT(fixedpoint_compare(diff, objs->max) == 0);
+
+  //test case - + (-1 + max)
+  lhs = objs->one;
+  lhs = fixedpoint_negate(objs->one);
+  rhs = objs->max;
+  diff = fixedpoint_sub(lhs, rhs);
+  Fixedpoint expected = fixedpoint_create2(0xFFFFFFFFFFFFFFFFUL - 0x1, 0xFFFFFFFFFFFFFFFFUL);
+  ASSERT(fixedpoint_is_valid(diff));
+  ASSERT(fixedpoint_compare(diff, expected) == 0);
+
+  //test case - - (-1 - (-1))
+  lhs = fixedpoint_negate(objs->one);
+  rhs = fixedpoint_negate(objs->one);
+  diff = fixedpoint_sub(lhs, rhs);
+  ASSERT(fixedpoint_compare(diff, objs->zero) == 0);
+
+  //test case + + (+1 - (+ 1))
+  lhs = (objs->one);
+  rhs = (objs->one);
+  diff = fixedpoint_sub(lhs, rhs);
+  ASSERT(fixedpoint_compare(diff, objs->zero) == 0);
+
+  //edge case 1 - 1
+  lhs = objs->one;
+  rhs = objs->one;
+  diff = fixedpoint_sub(lhs, rhs);
+  ASSERT(fixedpoint_is_valid(diff));
+  ASSERT(fixedpoint_compare(diff, objs->zero) == 0);
+
+  //-b0fc7e0.e993 - caf18a60.2c70 = -d6015241.1603 (random case)
+  lhs = fixedpoint_create_from_hex("-b0fc7e0.e993");
+  rhs = fixedpoint_create_from_hex("-caf18a60.2c70");
+  diff = fixedpoint_create_from_hex("-d6015241.1603");
+  ASSERT(fixedpoint_compare(fixedpoint_sub(lhs, rhs), diff) == 0);
+
+  // 0x659UL - 0xf75UL = 0x15ceUL (random case)
   lhs = fixedpoint_negate(fixedpoint_create(0x659UL));
   rhs = fixedpoint_create(0xf75UL);
-  printf("right is %llu, %llu, %d\n", rhs.whole_part, rhs.frac_part, rhs.tags);
-  printf("left  is %llu, %llu, %d\n", lhs.whole_part, lhs.frac_part, lhs.tags);
   diff = fixedpoint_sub(lhs, rhs);
   ASSERT(fixedpoint_is_neg(diff));
-  printf("%llx\n", fixedpoint_whole_part(diff));
-      ASSERT(0x15ceUL == fixedpoint_whole_part(diff));
+  ASSERT(0x15ceUL == fixedpoint_whole_part(diff));
   ASSERT(0x0UL == fixedpoint_frac_part(diff));
 }
 
@@ -286,9 +324,9 @@ void test_is_err(TestObjs *objs) {
 // TODO: implement more test functions
 
 void test_compare(TestObjs *objs) {
-  // //check to see if 0 is returned (same Fixedpoint) using create
-  // Fixedpoint zero_2 = fixedpoint_create(0x0UL);
-  // ASSERT(fixedpoint_compare(objs->zero.frac_part, zero_2.frac_part);
+  //check to see if 0 is returned (same Fixedpoint) using create
+  Fixedpoint zero_2 = fixedpoint_create(0x0UL);
+  ASSERT(fixedpoint_compare(objs->zero, zero_2));
 
   //check to see if compare returns 0 for the same Fixedpoint with both whole and frac parts
   Fixedpoint one_half_2 = fixedpoint_create2(0x0UL, 0x8000000000000000UL);
@@ -310,22 +348,45 @@ void test_compare(TestObjs *objs) {
 }
 
 void test_halve(TestObjs *objs) {
-  //check to see if halving 1/2 produces 1/4 and no underflow
-  //printf("Hello\n");
-  printf("%llx\n", objs->one_half.whole_part);
-  printf("%llx\n", objs->one_fourth.frac_part);
-  printf("hi\n");
 
+  //check to see if halving 1/2 produces 1/4 and no underflow
   ASSERT(fixedpoint_halve(objs->one_half).tags == vnon);
-  printf("%llx\n", fixedpoint_halve(objs->one_half).frac_part);
 
   //Testing 4.5 halve, result should be 2.25
   Fixedpoint four_and_a_half = fixedpoint_create2(0x0000000000000004UL, 0x8000000000000000UL);
   Fixedpoint two_and_one_fourth = fixedpoint_create2(0x0000000000000002UL, 0x4000000000000000UL);
-
-  printf("%llx\n", fixedpoint_halve(four_and_a_half).whole_part);
-  printf("%llx\n", two_and_one_fourth.whole_part);
-
   ASSERT(fixedpoint_halve(four_and_a_half).whole_part == two_and_one_fourth.whole_part);
   ASSERT(fixedpoint_halve(four_and_a_half).frac_part == two_and_one_fourth.frac_part);
+  ASSERT(fixedpoint_is_valid(fixedpoint_halve(four_and_a_half)));
+
+  //Testing edge case for 0
+  Fixedpoint lhs = (objs->zero);
+  Fixedpoint rhs = (objs->zero);
+  Fixedpoint half = fixedpoint_halve(lhs);
+  ASSERT(fixedpoint_compare(fixedpoint_halve(lhs), objs->zero) == 0);
+  ASSERT(fixedpoint_is_zero(half));
+
+  //Testing for 1 and 1/2
+  lhs = (objs->one);
+  rhs = (objs->one_half);
+  half = fixedpoint_halve(lhs);
+  ASSERT(fixedpoint_compare(half, objs->one_half) == 0);
+  ASSERT(fixedpoint_is_valid(half));
+
+  //Testing for -1 and -1/2
+  lhs = fixedpoint_negate(objs->one);
+  rhs = fixedpoint_negate(objs->one_half);
+  half = fixedpoint_halve(lhs);
+  ASSERT(fixedpoint_compare(half, rhs) == 0);
+  ASSERT(fixedpoint_is_neg(half));
+
+  //test for positive underflow
+  lhs = objs->max;
+  half = fixedpoint_halve(lhs);
+  ASSERT(fixedpoint_is_underflow_pos(half));
+
+  //test for negative underflow
+  lhs = fixedpoint_negate(objs->max);
+  half = fixedpoint_halve(lhs);
+  ASSERT(fixedpoint_is_underflow_neg(half));
 }

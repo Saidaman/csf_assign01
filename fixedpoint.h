@@ -130,6 +130,18 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right);
 //   the overflow was positive or negative)
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right);
 
+// Function for magnitude subtraction. This is used in fixedpoint_add and fixedpoint_sub
+// as a helper method to add fixedpoints that have opposite signs.
+//
+// Parameters:
+//    left - the left Fixedpoint value
+//    right - the right Fixedpoint value
+//
+// Returns:
+// The resulting fixed point value attained from the magnitude subtraction. This also
+// preserves the sign of the Fixedpoint with the larger magnitude.
+Fixedpoint mag_sub(Fixedpoint left, Fixedpoint right);
+
 // Negate a valid Fixedpoint value.  (I.e. a value with the same magnitude but
 // the opposite sign is returned.)  As a special case, the zero value is considered
 // to be its own negation.
@@ -285,7 +297,5 @@ int fixedpoint_is_valid(Fixedpoint val);
 //   dynamically allocated character string containing the representation
 //   of the Fixedpoint value
 char *fixedpoint_format_as_hex(Fixedpoint val);
-
-Fixedpoint mag_sub(Fixedpoint left, Fixedpoint right);
 
 #endif // FIXEDPREC_H
