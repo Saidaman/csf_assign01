@@ -224,8 +224,8 @@ void test_sub(TestObjs *objs) {
   ASSERT(0x0905000000000000UL == fixedpoint_frac_part(diff));
   */
 
-  lhs = fixedpoint_create(0x659UL);
-  rhs = fixedpoint_negate(fixedpoint_create(0xf75UL));
+  lhs = fixedpoint_negate(fixedpoint_create(0x659UL));
+  rhs = fixedpoint_create(0xf75UL);
   diff = fixedpoint_sub(lhs, rhs);
   ASSERT(!fixedpoint_is_neg(diff));
   ASSERT(0x15ceUL == fixedpoint_whole_part(diff));

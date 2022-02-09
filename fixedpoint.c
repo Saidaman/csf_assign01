@@ -56,7 +56,7 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) { //tests: adding s
       result.tags = ((result.frac_part < left.frac_part) || (result.frac_part < right.frac_part)) ? -1 : left.tags;
     }
     //need to see if 1 needs to be carried
-    if ((result.tags == -1) || (result.tags == -1)) { //need to carry the one
+    if ((result.tags == -1)) { //need to carry the one
       //***is this the corect way to "carry" the 1?
       result.whole_part = left.whole_part + right.whole_part + 1;
       //if ((result.whole_part < left.whole_part) ) result.tags = result.tags; //compare to both right and left
@@ -87,7 +87,7 @@ Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
       (right.frac_part == 0)) { //both left and right are 0
     return result;
   }
-  
+
   if ((left.tags == vnon) && (right.tags == vneg)) { //this is for the case left - (-right)
     right = fixedpoint_negate(right);
     return fixedpoint_add(left, right); // = left + right
@@ -97,7 +97,7 @@ Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
   } else if ((left.tags = vnon) && (right.tags == vnon)) { //this is for left - right
     right = fixedpoint_negate(right);
     return mag_sub(left, right);
-  } else { // this if for -left - (+right) = -left + (-right)
+  } else if ((left.tags = vneg) && (right.tags == vnon)) { // this if for -left - (+right) = -left + (-right)
     right = fixedpoint_negate(right);
     return fixedpoint_add(left, right);
   }
