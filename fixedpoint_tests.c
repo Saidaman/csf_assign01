@@ -40,8 +40,7 @@ void test_is_zero(TestObjs *objs);
 void test_is_underflow_pos(TestObjs *objs);
 void test_is_underflow_neg(TestObjs *objs);
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   // if a testname was specified on the command line, only that
   // test function will be executed
   if (argc > 1) {
@@ -459,8 +458,6 @@ void test_is_err(TestObjs *objs) {
   Fixedpoint err7 = fixedpoint_create_from_hex("7.0?4");
   ASSERT(fixedpoint_is_err(err7));
 }
-
-// TODO: implement more test functions
 
 void test_compare(TestObjs *objs) {
   //check to see if 0 is returned (same Fixedpoint) using create

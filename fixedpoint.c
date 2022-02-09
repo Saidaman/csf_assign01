@@ -41,11 +41,9 @@ int valid_hex(const char *hex) {
       points++;
       which_half = 1; // switches to second half valid hex char count
     }
-
     if (hex[i] == '-' && i > 0) { // sign can only be at the start of the string
       valid = 0;
     }
-
     if (!(hex[i] == '.' || is_valid_char || hex[i] == '-')) {
       valid = 0; // no longer a valid hex string
     }
@@ -60,41 +58,41 @@ int valid_hex(const char *hex) {
 }
 
 Fixedpoint create_fixedpoint_in_hex(uint64_t points, uint64_t point_index, int negated, const char *hex) {
-   uint64_t whole = 0;
-   uint64_t frac = 0;
+  uint64_t whole = 0;
+  uint64_t frac = 0;
    
-   if (points == 0) { // No need to worry about a frac part
-      whole = strtoull(hex, NULL, 16);
-      frac = 0;
-   } else { // Need to worry about frac part
-      whole = strtoull(hex, NULL, 16);
+  if (points == 0) { // No need to worry about a frac part
+    whole = strtoull(hex, NULL, 16);
+    frac = 0;
+  } else { // Need to worry about frac part
+    whole = strtoull(hex, NULL, 16);
    
-      char frac_string[17];
-      strcpy(frac_string, hex + point_index + 1 - negated); // pointer arithmetic to copy chars over
-      uint64_t frac_length = strlen(frac_string); // length after pointer arithmetic
-      uint64_t padding = 16 - frac_length; // padding count
-      char zero_padding[17];
-      memset(zero_padding, '0', padding);
-      zero_padding[padding] = '\0';
-      char * padded_frac = strcat(frac_string, zero_padding);
-      frac = strtoull(padded_frac, NULL, 16);
-   }
+    char frac_string[17];
+    strcpy(frac_string, hex + point_index + 1 - negated); // pointer arithmetic to copy chars over
+    uint64_t frac_length = strlen(frac_string); // length after pointer arithmetic
+    uint64_t padding = 16 - frac_length; // padding count
+    char zero_padding[17];
+    memset(zero_padding, '0', padding);
+    zero_padding[padding] = '\0';
+    char * padded_frac = strcat(frac_string, zero_padding);
+    frac = strtoull(padded_frac, NULL, 16);
+  }
    
-   Fixedpoint result = fixedpoint_create2(whole, frac);
-   if (negated) {
-      result.tags = vneg;
-   } else {
-      result.tags = vnon;   
-   }
+  Fixedpoint result = fixedpoint_create2(whole, frac);
+  if (negated) {
+    result.tags = vneg;
+  } else {
+    result.tags = vnon;   
+  }
 
-   return result;
+  return result;
 }
 
 Fixedpoint fixedpoint_create_from_hex(const char *hex) {
   if (!valid_hex(hex)) {
-      Fixedpoint error_fpv = fixedpoint_create2(0, 0);
-      error_fpv.tags = error;
-      return error_fpv; // return error-tagged Fixedpoint value
+    Fixedpoint error_fpv = fixedpoint_create2(0, 0);
+    error_fpv.tags = error;
+    return error_fpv; // return error-tagged Fixedpoint value
   }
 
   uint64_t points = 0; // decimal point(s) count
@@ -114,7 +112,7 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
     hex++; // pointer arithmetic to look over sign
   }
 
-   return create_fixedpoint_in_hex(points, point_index, negated, hex);
+  return create_fixedpoint_in_hex(points, point_index, negated, hex);
 }
 
 uint64_t fixedpoint_whole_part(Fixedpoint val) {
@@ -128,11 +126,11 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   Fixedpoint result = fixedpoint_create2(0,0);
   if ((left.whole_part == 0) &&
-      (left.frac_part == 0) &&
-      (right.whole_part == 0) &&
-      (right.frac_part == 0)) { //both left and right are 0
-      return result;
-    }
+    (left.frac_part == 0) &&
+    (right.whole_part == 0) &&
+    (right.frac_part == 0)) { //both left and right are 0
+    return result;
+  }
   //if they are the same sign
   if (left.tags == right.tags) {
     result.frac_part = left.frac_part + right.frac_part;
@@ -165,7 +163,7 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
 
   //Need to check for +- and -+
   if (((left.tags == vnon) && (right.tags == vneg)) ||
-      ((left.tags == vneg) && (right.tags == vnon))) {
+    ((left.tags == vneg) && (right.tags == vnon))) {
     return mag_sub(left, right);
   }
   return result;
@@ -174,9 +172,9 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
   Fixedpoint result = fixedpoint_create2(0, 0);
   if ((left.whole_part == 0) && 
-      (left.frac_part == 0) && 
-      (right.whole_part == 0) && 
-      (right.frac_part == 0)) { //both left and right are 0
+    (left.frac_part == 0) && 
+    (right.whole_part == 0) && 
+    (right.frac_part == 0)) { //both left and right are 0
     return result;
   }
 
@@ -222,22 +220,20 @@ Fixedpoint mag_sub(Fixedpoint left, Fixedpoint right) { //signs always differ
   return result;
 }
 
-  Fixedpoint fixedpoint_negate(Fixedpoint val)
-  {
-    if (fixedpoint_is_zero(val))
-    {
-      val.tags = vnon;
-    } else if (val.tags == vnon) {
-      val.tags = vneg;
+Fixedpoint fixedpoint_negate(Fixedpoint val) {
+  if (fixedpoint_is_zero(val)) {
+    val.tags = vnon;
+  } else if (val.tags == vnon) {
+    val.tags = vneg;
   } else if (val.tags == vneg) {
-      val.tags = vnon;
+    val.tags = vnon;
   }
   return val;
 }
 
 Fixedpoint fixedpoint_halve(Fixedpoint val) {
-  if (val.frac_part & 1){
-     if (val.tags == vneg) {
+  if (val.frac_part & 1) {
+    if (val.tags == vneg) {
       val.tags = negunder;
     } else {
       val.tags = posunder;
@@ -385,10 +381,5 @@ char *fixedpoint_format_as_hex(Fixedpoint val) {
       null_terminator--;
     }
   }
-  // char result[35];
-  // for (int i = 0; i < 35; i++) {
-  //   result[i] = s[i];
-  // }
-  // free(s);
   return s;
 }
