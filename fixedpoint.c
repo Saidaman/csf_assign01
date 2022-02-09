@@ -26,79 +26,55 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
 }
 
 int valid_hex(const char *hex) {
-   uint64_t points = 0;
-   uint64_t valid_chars = 0;
-   uint64_t valid_chars_in_each_half[2] = {0, 0};
-   int which_half = 0;
-   int valid = 1;
+   uint64_t points = 0; // number of decimal points
+   uint64_t valid_chars = 0; //number of valid hex characters
+   uint64_t valid_chars_in_each_half[2] = {0, 0}; // number of valid hex characters in each half of string
+   int which_half = 0; // indicator of which half of string (before/after decimal point)
+   uint64_t length = strlen(hex); // length of string
+   int valid = 1; // return variable;
    
-   uint64_t length = strlen(hex);
    for (uint64_t i = 0; i < length; i++) {
+      uint64_t is_valid_char = (hex[i] >= '0' && hex[i] <= '9') || (hex[i] >= 'a' && hex[i] <= 'f') || (hex[i] >= 'A' && hex[i] <= 'F');
       if (hex[i] == '.') {
          points++;
-         which_half = 1;
+         which_half = 1; // switches to second half valid hex char count
       }
-      uint64_t is_valid_char = (hex[i] >= '0' && hex[i] <= '9') || (hex[i] >= 'a' && hex[i] <= 'f') || (hex[i] >= 'A' && hex[i] <= 'F');
       if (!(is_valid_char || hex[i] == '-' || hex[i] == '.')) {
-         valid = 0;
+         valid = 0; // no longer a valid hex string
       }
       if (is_valid_char) {
-         valid_chars_in_each_half[which_half] += 1;
+         valid_chars_in_each_half[which_half] += 1; // counting number of valid hex characters in given half of string
       }
    }
    if (valid_chars_in_each_half[0] > 16 || valid_chars_in_each_half[1] > 16 || points > 1) {
-      valid = 0;
+      valid = 0; // no longer a valid hex string
    }
    
    return valid;
 }
 
-Fixedpoint fixedpoint_create_from_hex(const char *hex) {
-  if (!valid_hex(hex)) {
-      Fixedpoint error_fpv = fixedpoint_create2(0, 0);
-      error_fpv.tags = error;
-      return error_fpv;
-   }
-
-   uint64_t points = 0;
-   uint64_t point_index = 0;
-   uint64_t length = strlen(hex);
-   for (uint64_t i = 0; i < length; i++) {
-      if (hex[i] == '.') {
-         points++;
-         point_index = i;
-      }
-   }
-
-   uint64_t negated = 0;	
-   if (hex[0] == '-') {
-      negated = 1;
-      hex++;
-   }
-
+Fixedpoint create_fixedpoint_in_hex(uint64_t points, uint64_t point_index, int negated, const char *hex) {
    uint64_t whole = 0;
    uint64_t frac = 0;
    
-   if (points == 0) {
+   if (points == 0) { // No need to worry about a frac part
       whole = strtoull(hex, NULL, 16);
       frac = 0;
    } 
-   else {
+   else { // Need to worry about frac part
       whole = strtoull(hex, NULL, 16);
    
       char frac_string[17];
-      strcpy(frac_string, hex + point_index + 1 - negated);
-   
-      uint64_t frac_length = strlen(frac_string);
-      uint64_t padding = 16 - frac_length;
+      strcpy(frac_string, hex + point_index + 1 - negated); // pointer arithmetic to copy chars over
+      uint64_t frac_length = strlen(frac_string); // length after pointer arithmetic
+      uint64_t padding = 16 - frac_length; // padding count
       char zero_padding[17];
       memset(zero_padding, '0', padding);
       zero_padding[padding] = '\0';
-   
       char * padded_frac = strcat(frac_string, zero_padding);
       frac = strtoull(padded_frac, NULL, 16);
    }
-
+   
    Fixedpoint result = fixedpoint_create2(whole, frac);
    if (negated) {
       result.tags = vneg;
@@ -107,6 +83,33 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
       result.tags = vnon;   
    }
    return result;
+}
+
+Fixedpoint fixedpoint_create_from_hex(const char *hex) {
+  if (!valid_hex(hex)) {
+      Fixedpoint error_fpv = fixedpoint_create2(0, 0);
+      error_fpv.tags = error;
+      return error_fpv; // return error-tagged Fixedpoint value
+  }
+
+  uint64_t points = 0; // decimal point(s) count
+  uint64_t point_index = 0; // decimal point location
+  uint64_t length = strlen(hex);
+  int negated = 0; // Indicator variable for whether hex is signed
+
+  for (uint64_t i = 0; i < length; i++) {
+    if (hex[i] == '.') {
+      points++;
+      point_index = i;
+    }
+  }
+  
+  if (hex[0] == '-') {
+    negated = 1;
+    hex++; // pointer arithmetic to look over sign
+  }
+
+   return create_fixedpoint_in_hex(points, point_index, negated, hex);
 }
 
 uint64_t fixedpoint_whole_part(Fixedpoint val) {

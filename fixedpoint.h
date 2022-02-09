@@ -45,6 +45,19 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac);
 
 int valid_hex(const char *hex);
 
+// Helper function for fixedpoint_create_from_hex. This function constructs
+// the Fixedpoint value to be returned in its parent, fixedpoint_create_from_hex function.
+//
+// Parameters:
+//    points - number of decimal points in hex value
+//    point_index - location of the decimal point in hex value
+//    negated - indicator whether the hex value is signed
+//    hex - the string of the hex value (char array)
+//
+// Returns:
+//    a Fixedpoint value with given information of its equivalent hex value
+Fixedpoint create_fixedpoint_in_hex(uint64_t points, uint64_t point_index, int negated, const char *hex);
+
 // Create a Fixedpoint value from a string representation.
 // The string will have one of the following forms:
 //
