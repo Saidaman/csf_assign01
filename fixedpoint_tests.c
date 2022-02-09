@@ -292,8 +292,8 @@ void test_add(TestObjs *objs) {
 
   //complex negative add case: adding fractions for a fractional result
   lhs = fixedpoint_negate(objs->one);
-  Fixedpoint add_temp = objs->one_fourth;
-  Fixedpoint temp_sum = fixedpoint_add(lhs, add_temp);
+  add_temp = objs->one_fourth;
+  temp_sum = fixedpoint_add(lhs, add_temp);
   rhs = objs -> one_fourth;
   sum = fixedpoint_add(temp_sum, rhs);
   ASSERT(fixedpoint_compare(sum, fixedpoint_negate(objs->one_half)) == 0);
@@ -505,13 +505,6 @@ void test_halve(TestObjs *objs) {
 }
 
 void test_double(TestObjs *objs) {
-<<<<<<< HEAD
-//double test
-}
-
-void test_is_overflow_neg(TestObjs *objs) {
-  
-=======
   //check to see if doubling 1/2 produces 1
   ASSERT(fixedpoint_compare(fixedpoint_double(objs->one_half), objs->one));
 
@@ -544,5 +537,4 @@ void test_is_overflow_neg(TestObjs *objs) {
   lhs = fixedpoint_negate(objs->max);
   doubl = fixedpoint_double(lhs);
   ASSERT(fixedpoint_is_overflow_neg(doubl));
->>>>>>> 4f98bc1af74da7883cd7fcc8dcc6e58f7c4783d9
 }
