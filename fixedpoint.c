@@ -133,13 +133,13 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   if (left.tags == right.tags) {
     result.frac_part = left.frac_part + right.frac_part;
     if (left.tags == vnon) { //for non-negative values
-      result.tags = ((result.frac_part < left.frac_part) || (result.frac_part < right.frac_part)) ? -1 : left.tags; 
+      result.tags = ((result.frac_part < left.frac_part) || (result.frac_part < right.frac_part)) ? 7 : left.tags; 
     } else { //for negative values
-      result.tags = ((result.frac_part < left.frac_part) || (result.frac_part < right.frac_part)) ? -1 : left.tags;
+      result.tags = ((result.frac_part < left.frac_part) || (result.frac_part < right.frac_part)) ? 7 : left.tags;
     }
-    int fraction_overflow = (result.tags == -1) ? 1 : 0;
+    int fraction_overflow = (result.tags == 7) ? 1 : 0;
     //need to see if 1 needs to be carried
-    if (result.tags == -1) { //need to carry the one
+    if (result.tags == 7) { //need to carry the one
       //***is this the corect way to "carry" the 1?
       result.whole_part = left.whole_part + right.whole_part;
       //if ((result.whole_part < left.whole_part) ) result.tags = result.tags; //compare to both right and left
