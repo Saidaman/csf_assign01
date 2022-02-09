@@ -36,6 +36,7 @@ void test_is_err(TestObjs *objs);
 void test_compare(TestObjs *objs);
 void test_halve(TestObjs *objs);
 void test_double(TestObjs *objs);
+void test_is_overflow_neg(TestObjs *objs);
 
 int main(int argc, char **argv)
 {
@@ -68,6 +69,7 @@ int main(int argc, char **argv)
   TEST(test_compare);
   TEST(test_halve);
   TEST(test_double);
+  TEST(test_is_overflow_neg);
 
   TEST_FINI();
 }
@@ -477,4 +479,8 @@ void test_halve(TestObjs *objs) {
 
 void test_double(TestObjs *objs) {
 //double test
+}
+
+void test_is_overflow_neg(TestObjs *objs) {
+  
 }
