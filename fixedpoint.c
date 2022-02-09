@@ -26,8 +26,9 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
 }
 
 Fixedpoint fixedpoint_create_from_hex(const char *hex) {
-  //need to check for invalid
-
+  //TODO
+assert(0);
+return DUMMY;
 }
 
 uint64_t fixedpoint_whole_part(Fixedpoint val) {
@@ -38,7 +39,7 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
   return val.frac_part;
 }
 
-Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) { //tests: adding small pos value to large neg value
+Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   Fixedpoint result = fixedpoint_create2(0,0);
   uint64_t og_leftwhole = left.whole_part;
   if ((left.whole_part == 0) &&
@@ -77,7 +78,7 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) { //tests: adding s
     }
   }
 
-    //Need to check for +- and -+
+  //Need to check for +- and -+
   if (((left.tags == vnon) && (right.tags == vneg)) ||
       ((left.tags == vneg) && (right.tags == vnon))) {
     return mag_sub(left, right);
@@ -86,8 +87,6 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) { //tests: adding s
 }
 
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
-  printf("123left  is %llu, %llu, %d\n", left.whole_part, left.frac_part, left.tags);
-
   Fixedpoint result = fixedpoint_create2(0, 0);
   if ((left.whole_part == 0) && 
       (left.frac_part == 0) && 
@@ -261,9 +260,37 @@ int fixedpoint_is_valid(Fixedpoint val) {
 }
 
 char *fixedpoint_format_as_hex(Fixedpoint val) {
-  // TODO: implement
-  assert(0);
-  char *s = malloc(20);
-  strcpy(s, "<invalid>");
+  //string for the Fixedpoing as string output
+  char *s = malloc(35); //32 bits for digits, 1 for sign, 1 for decimal, 1 for \0
+  //check to see if val is negative
+  if (fixedpoint_is_neg(val)) {
+    s[0] = '-';
+  }
+  //the frac part is 0
+  if (val.frac_part == 0) {
+    if (fixedpoint_is_neg(val)) { //'-' takes first index
+      sprintf(s + 1, "%lx", val.whole_part);
+    } else {
+      sprintf(s, "%lx", val.whole_part);
+    }
+  } else {
+    if (fixedpoint_is_neg(val)) {
+      sprintf(s + 1, "%lx.%016lx", val.whole_part, val.frac_part);
+    } else {
+      sprintf(s, "%lx.%016lx", val.whole_part, val.frac_part);
+    }
+    //to remove 0 padding on the right
+    size_t s_size =  strlen(s) - 1;
+    char *null_terminator = s + s_size;
+    while(*null_terminator == '0') {
+      *null_terminator = '\0';
+      null_terminator--;
+    }
+  }
+  // char result[35];
+  // for (int i = 0; i < 35; i++) {
+  //   result[i] = s[i];
+  // }
+  // free(s);
   return s;
 }
