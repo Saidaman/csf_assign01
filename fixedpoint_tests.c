@@ -341,7 +341,6 @@ void test_compare(TestObjs *objs) {
   ASSERT(fixedpoint_compare(objs->zero, zero_2));
 
   //check to see if compare returns 0 for the same Fixedpoint with both whole and frac parts
-  Fixedpoint one_half_2 = fixedpoint_create2(0x0UL, 0x8000000000000000UL);
   Fixedpoint one_half_3 = fixedpoint_create2(0, 0x10);
   ASSERT(fixedpoint_compare(objs->one_half, one_half_3));
 

@@ -12,10 +12,6 @@
 #include <assert.h>
 #include "fixedpoint.h"
 
-// You can remove this once all of the functions are fully implemented
-//this is a test
-static Fixedpoint DUMMY;
-// ask about how the values will be entered as negatives for the other functions
 Fixedpoint fixedpoint_create(uint64_t whole) {
   Fixedpoint x;
   x.whole_part = whole;
@@ -34,7 +30,6 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
 
 int valid_hex(const char *hex) {
    uint64_t points = 0; // number of decimal points
-   uint64_t valid_chars = 0; //number of valid hex characters
    uint64_t valid_chars_in_each_half[2] = {0, 0}; // number of valid hex characters in each half of string
    int which_half = 0; // indicator of which half of string (before/after decimal point)
    uint64_t length = strlen(hex); // length of string
@@ -128,7 +123,6 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
 
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   Fixedpoint result = fixedpoint_create2(0,0);
-  uint64_t og_leftwhole = left.whole_part;
   if ((left.whole_part == 0) &&
       (left.frac_part == 0) &&
       (right.whole_part == 0) &&
@@ -143,9 +137,9 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
     } else { //for negative values
       result.tags = ((result.frac_part < left.frac_part) || (result.frac_part < right.frac_part)) ? -1 : left.tags;
     }
-    int fraction_overflow = result.tags == -1 ? 1 : 0;
+    int fraction_overflow = (result.tags == -1) ? 1 : 0;
     //need to see if 1 needs to be carried
-    if ((result.tags == -1)) { //need to carry the one
+    if (result.tags == -1) { //need to carry the one
       //***is this the corect way to "carry" the 1?
       result.whole_part = left.whole_part + right.whole_part;
       //if ((result.whole_part < left.whole_part) ) result.tags = result.tags; //compare to both right and left
@@ -369,15 +363,15 @@ char *fixedpoint_format_as_hex(Fixedpoint val) {
   //the frac part is 0
   if (val.frac_part == 0) {
     if (fixedpoint_is_neg(val)) { //'-' takes first index
-      sprintf(s + 1, "%lx", val.whole_part);
+      sprintf(s + 1, "%llx", val.whole_part);
     } else {
-      sprintf(s, "%lx", val.whole_part);
+      sprintf(s, "%llx", val.whole_part);
     }
   } else {
     if (fixedpoint_is_neg(val)) {
-      sprintf(s + 1, "%lx.%016lx", val.whole_part, val.frac_part);
+      sprintf(s + 1, "%llx.%016llx", val.whole_part, val.frac_part);
     } else {
-      sprintf(s, "%lx.%016lx", val.whole_part, val.frac_part);
+      sprintf(s, "%llx.%016llx", val.whole_part, val.frac_part);
     }
     //to remove 0 padding on the right
     size_t s_size =  strlen(s) - 1;
