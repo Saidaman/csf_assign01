@@ -111,14 +111,14 @@ Fixedpoint mag_sub(Fixedpoint left, Fixedpoint right) { //signs always differ
     sign_tag = left.tags;
     result.whole_part = left.whole_part - right.whole_part;
     result.frac_part = left.frac_part - right.frac_part;
-    if ((result.frac_part > left.frac_part) || (result.frac_part > right.frac_part)) { //checking for "carry"
+    if ((result.frac_part > left.frac_part)) { //checking for "carry"
       result.whole_part = result.whole_part - (0x0000000000000001);
     }
   } else if (right.whole_part > left.whole_part) {
     sign_tag = right.tags;
     result.whole_part = right.whole_part - left.whole_part;
     result.frac_part = right.frac_part - left.frac_part;
-    if ((result.frac_part > right.frac_part) || (result.frac_part > left.frac_part)) {
+    if ((result.frac_part > right.frac_part)) {
       result.whole_part = result.whole_part - (0x0000000000000001);
     }
   } else if (left.frac_part > right.frac_part) {
@@ -167,6 +167,11 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
   }
 
 Fixedpoint fixedpoint_double(Fixedpoint val) {
+  if (val.whole_part>>63) {
+    if (val.tags == vnon) val.tags = posover;
+    if (val.tags == vneg) val.tags = negover;
+    return val;
+  }
   //need to make sure to correctly show overflow in add
   return fixedpoint_add(val,val);
   
