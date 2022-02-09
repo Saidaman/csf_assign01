@@ -35,6 +35,7 @@ void test_is_err(TestObjs *objs);
     // TODO: add more test functions
 void test_compare(TestObjs *objs);
 void test_halve(TestObjs *objs);
+void test_double(TestObjs *objs);
 
 int main(int argc, char **argv)
 {
@@ -66,6 +67,7 @@ int main(int argc, char **argv)
   // here. This ensures that your test function will actually be executed.
   TEST(test_compare);
   TEST(test_halve);
+  TEST(test_double);
 
   TEST_FINI();
 }
@@ -457,4 +459,8 @@ void test_halve(TestObjs *objs) {
   lhs = fixedpoint_negate(objs->max);
   half = fixedpoint_halve(lhs);
   ASSERT(fixedpoint_is_underflow_neg(half));
+}
+
+void test_double(TestObjs *objs) {
+//double test
 }
