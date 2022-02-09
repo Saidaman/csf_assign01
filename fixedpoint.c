@@ -26,9 +26,8 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
 }
 
 Fixedpoint fixedpoint_create_from_hex(const char *hex) {
-  // TODO: implement
-  assert(0);
-  return DUMMY;
+  //need to check for invalid
+
 }
 
 uint64_t fixedpoint_whole_part(Fixedpoint val) {
@@ -39,7 +38,7 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
   return val.frac_part;
 }
 
-Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
+Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) { //tests: adding small pos value to large neg value
   Fixedpoint result = fixedpoint_create2(0,0);
   uint64_t og_leftwhole = left.whole_part;
   if ((left.whole_part == 0) &&
@@ -52,19 +51,19 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   if (left.tags == right.tags) {
     result.frac_part = left.frac_part + right.frac_part;
     if (left.tags == vnon) { //for non-negative values
-      result.tags = ((result.frac_part < left.frac_part) || (result.frac_part < left.frac_part)) ? posover : left.tags; 
+      result.tags = ((result.frac_part < left.frac_part) || (result.frac_part < right.frac_part)) ? -1 : left.tags; 
     } else { //for negative values
-      result.tags = ((result.frac_part < left.frac_part) || (result.frac_part < left.frac_part)) ? negover : left.tags;
+      result.tags = ((result.frac_part < left.frac_part) || (result.frac_part < right.frac_part)) ? -1 : left.tags;
     }
     //need to see if 1 needs to be carried
-    if ((result.tags == posover) || (result.tags == negover)) { //need to carry the one
+    if ((result.tags == -1) || (result.tags == -1)) { //need to carry the one
       //***is this the corect way to "carry" the 1?
-      left.whole_part += (0x0000000000000001);
-      if (left.whole_part < og_leftwhole) result.tags = result.tags; //compare to both right and left
-      result.whole_part = left.whole_part + right.whole_part;
+      result.whole_part = left.whole_part + right.whole_part + 1;
+      //if ((result.whole_part < left.whole_part) ) result.tags = result.tags; //compare to both right and left
     } else {
       result.whole_part = left.whole_part + right.whole_part;
     }
+    //check for overflow
     if (left.tags == vnon) { //for non-negative values, check whether overflow occured in whole (again)
       result.tags = ((result.whole_part < left.whole_part) || (result.whole_part < right.whole_part)) ? posover : left.tags;
     } else { //for negative values, check whether overflow occured
@@ -112,7 +111,7 @@ Fixedpoint mag_sub(Fixedpoint left, Fixedpoint right) { //signs always differ
     sign_tag = left.tags;
     result.whole_part = left.whole_part - right.whole_part;
     result.frac_part = left.frac_part - right.frac_part;
-    if ((result.frac_part > left.frac_part) || (result.frac_part > right.frac_part)) {
+    if ((result.frac_part > left.frac_part) || (result.frac_part > right.frac_part)) { //checking for "carry"
       result.whole_part = result.whole_part - (0x0000000000000001);
     }
   } else if (right.whole_part > left.whole_part) {
