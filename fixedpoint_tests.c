@@ -13,8 +13,6 @@ typedef struct {
   Fixedpoint large2;
   Fixedpoint max;
   Fixedpoint min;
-
-  // TODO: add more objects to the test fixture
 } TestObjs;
 
 // functions to create and destroy the test fixture
@@ -254,22 +252,51 @@ void test_add(TestObjs *objs) {
   lhs = fixedpoint_create_from_hex("-3cc95b.980ac");
   rhs = fixedpoint_create_from_hex("b82b0007.e9e240");
   sum = fixedpoint_add(lhs, rhs);
-  Fixedpoint expSum = fixedpoint_create_from_hex("b7ee36ac.51d780"); // expected sum
-  ASSERT(fixedpoint_compare(sum, expSum) == 0);
+  Fixedpoint exp_sum = fixedpoint_create_from_hex("b7ee36ac.51d780"); // expected sum
+  ASSERT(fixedpoint_compare(sum, exp_sum) == 0);
 
   //-914b7.b + -3f02c38a169c5f.a0560 = -3f02c38a1fb117.50560
   lhs = fixedpoint_create_from_hex("-914b7.b");
   rhs = fixedpoint_create_from_hex("-3f02c38a169c5f.a0560");
   sum = fixedpoint_add(lhs, rhs);
-  Fixedpoint expSum2 = fixedpoint_create_from_hex("-3f02c38a1fb117.50560"); // expected sum
-  ASSERT(fixedpoint_compare(sum, expSum2) == 0);
+  Fixedpoint exp_sum2 = fixedpoint_create_from_hex("-3f02c38a1fb117.50560"); // expected sum
+  ASSERT(fixedpoint_compare(sum, exp_sum2) == 0);
 
   //-eb92754a446478.51892e29e2eb08 + -f42c161118bd8.bf = -fad536ab55f051.10892e29e2eb08
   lhs = fixedpoint_create_from_hex("-eb92754a446478.51892e29e2eb08");
   rhs = fixedpoint_create_from_hex("-f42c161118bd8.bf");
   sum = fixedpoint_add(lhs, rhs);
-  Fixedpoint expSum3 = fixedpoint_create_from_hex("-fad536ab55f051.10892e29e2eb08"); // expected sum
-  ASSERT(fixedpoint_compare(sum, expSum3) == 0);
+  Fixedpoint exp_sum3 = fixedpoint_create_from_hex("-fad536ab55f051.10892e29e2eb08"); // expected sum
+  ASSERT(fixedpoint_compare(sum, exp_sum3) == 0);
+
+  //adding .5 to .5 should result in 1
+  lhs = objs -> one_half;
+  rhs = objs -> one_half;
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_compare(objs->one, sum) == 0);
+
+  //adding .5 to -.5 should result in 0
+  lhs = fixedpoint_negate(objs->one_half);
+  rhs = objs -> one_half;
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_zero(sum));
+
+  //complex positive add case: adding fractions for a fractional result
+  lhs = objs->one_half;
+  Fixedpoint add_temp = objs->one_fourth;
+  Fixedpoint temp_sum = fixedpoint_add(lhs, add_temp);
+  rhs = objs -> one_half;
+  sum = fixedpoint_add(rhs, temp_sum);
+  Fixedpoint one_and_one_fourth = fixedpoint_create2(0UL, 0x4000000000000000UL);
+  ASSERT(fixedpoint_compare(one_and_one_fourth, sum) == 0);
+
+  //complex negative add case: adding fractions for a fractional result
+  lhs = fixedpoint_negate(objs->one);
+  Fixedpoint add_temp = objs->one_fourth;
+  Fixedpoint temp_sum = fixedpoint_add(lhs, add_temp);
+  rhs = objs -> one_fourth;
+  sum = fixedpoint_add(temp_sum, rhs);
+  ASSERT(fixedpoint_compare(sum, fixedpoint_negate(objs->one_half)) == 0);
 }
 
 void test_sub(TestObjs *objs) {
@@ -478,9 +505,44 @@ void test_halve(TestObjs *objs) {
 }
 
 void test_double(TestObjs *objs) {
+<<<<<<< HEAD
 //double test
 }
 
 void test_is_overflow_neg(TestObjs *objs) {
   
+=======
+  //check to see if doubling 1/2 produces 1
+  ASSERT(fixedpoint_compare(fixedpoint_double(objs->one_half), objs->one));
+
+  //check to ses if doubling 1/2 doesn't overflow
+  ASSERT(fixedpoint_double(objs->one_half).tags == vnon);
+
+  //Testing 2.25 double, result should be 4.5
+  Fixedpoint four_and_a_half = fixedpoint_create2(0x0000000000000004UL, 0x8000000000000000UL);
+  Fixedpoint two_and_one_fourth = fixedpoint_create2(0x0000000000000002UL, 0x4000000000000000UL);
+  ASSERT(fixedpoint_double(two_and_one_fourth).whole_part == four_and_a_half.whole_part);
+  ASSERT(fixedpoint_double(two_and_one_fourth).frac_part == four_and_a_half.frac_part);
+  ASSERT(fixedpoint_is_valid(fixedpoint_double(two_and_one_fourth)));
+
+  //Testing edge case for 0. Doubling 0 should result in 0
+  ASSERT(fixedpoint_is_zero(fixedpoint_double(objs->zero)));
+
+  //Testing for -1 and -1/2
+  Fixedpoint rhs = fixedpoint_negate(objs->one);
+  Fixedpoint lhs = fixedpoint_negate(objs->one_half);
+  Fixedpoint doubl = fixedpoint_double(lhs);
+  ASSERT(fixedpoint_compare(doubl, rhs) == 0);
+  ASSERT(fixedpoint_is_neg(doubl));
+
+  //test for positive overflow
+  lhs = objs->max;
+  doubl = fixedpoint_double(lhs);
+  ASSERT(fixedpoint_is_overflow_pos(doubl));
+
+  //test for negative overflow
+  lhs = fixedpoint_negate(objs->max);
+  doubl = fixedpoint_double(lhs);
+  ASSERT(fixedpoint_is_overflow_neg(doubl));
+>>>>>>> 4f98bc1af74da7883cd7fcc8dcc6e58f7c4783d9
 }
