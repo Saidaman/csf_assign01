@@ -55,10 +55,11 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) { //tests: adding s
     } else { //for negative values
       result.tags = ((result.frac_part < left.frac_part) || (result.frac_part < right.frac_part)) ? -1 : left.tags;
     }
+    int fraction_overflow = result.tags == -1 ? 1 : 0;
     //need to see if 1 needs to be carried
     if ((result.tags == -1)) { //need to carry the one
       //***is this the corect way to "carry" the 1?
-      result.whole_part = left.whole_part + right.whole_part + 1;
+      result.whole_part = left.whole_part + right.whole_part;
       //if ((result.whole_part < left.whole_part) ) result.tags = result.tags; //compare to both right and left
     } else {
       result.whole_part = left.whole_part + right.whole_part;
@@ -68,6 +69,11 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) { //tests: adding s
       result.tags = ((result.whole_part < left.whole_part) || (result.whole_part < right.whole_part)) ? posover : left.tags;
     } else { //for negative values, check whether overflow occured
       result.tags = ((result.whole_part < left.whole_part) || (result.whole_part < right.whole_part)) ? negover : left.tags;
+    }
+    if (result.whole_part == 0xFFFFFFFFFFFFFFFFUL && fraction_overflow) {
+      result.tags = left.tags == vnon ? posover : negover; 
+    } else if (result.whole_part != 0xFFFFFFFFFFFFFFFFUL && fraction_overflow) {
+      result.whole_part++;
     }
   }
 
@@ -80,6 +86,8 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) { //tests: adding s
 }
 
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
+  printf("123left  is %llu, %llu, %d\n", left.whole_part, left.frac_part, left.tags);
+
   Fixedpoint result = fixedpoint_create2(0, 0);
   if ((left.whole_part == 0) && 
       (left.frac_part == 0) && 
@@ -88,16 +96,13 @@ Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
     return result;
   }
 
-  if ((left.tags == vnon) && (right.tags == vneg)) { //this is for the case left - (-right)
-    right = fixedpoint_negate(right);
-    return fixedpoint_add(left, right); // = left + right
-  } else if ((left.tags == vneg) && (right.tags == vneg)) { // this is for -left - (-right) = -left + right
+  if ((left.tags == vneg) && (right.tags == vneg)) { // this is for -left - (-right) = -left + right
     right = fixedpoint_negate(right);
     return mag_sub(left, right);
-  } else if ((left.tags = vnon) && (right.tags == vnon)) { //this is for left - right
+  } else if ((left.tags == vnon) && (right.tags == vnon)) { //this is for left - right
     right = fixedpoint_negate(right);
     return mag_sub(left, right);
-  } else if ((left.tags = vneg) && (right.tags == vnon)) { // this if for -left - (+right) = -left + (-right)
+  } else { // this if for -left - (+right) = -left + (-right)
     right = fixedpoint_negate(right);
     return fixedpoint_add(left, right);
   }

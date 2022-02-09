@@ -226,9 +226,12 @@ void test_sub(TestObjs *objs) {
 
   lhs = fixedpoint_negate(fixedpoint_create(0x659UL));
   rhs = fixedpoint_create(0xf75UL);
+  printf("right is %llu, %llu, %d\n", rhs.whole_part, rhs.frac_part, rhs.tags);
+  printf("left  is %llu, %llu, %d\n", lhs.whole_part, lhs.frac_part, lhs.tags);
   diff = fixedpoint_sub(lhs, rhs);
-  ASSERT(!fixedpoint_is_neg(diff));
-  ASSERT(0x15ceUL == fixedpoint_whole_part(diff));
+  ASSERT(fixedpoint_is_neg(diff));
+  printf("%llx\n", fixedpoint_whole_part(diff));
+      ASSERT(0x15ceUL == fixedpoint_whole_part(diff));
   ASSERT(0x0UL == fixedpoint_frac_part(diff));
 }
 
