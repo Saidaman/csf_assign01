@@ -290,12 +290,10 @@ void test_sub(TestObjs *objs) {
   ASSERT(fixedpoint_compare(diff, objs->max) == 0);
 
   //test case - + (-1 + max)
-  lhs = objs->one;
   lhs = fixedpoint_negate(objs->one);
   rhs = objs->max;
   diff = fixedpoint_sub(lhs, rhs);
-  Fixedpoint expected = fixedpoint_create2(0xFFFFFFFFFFFFFFFFUL - 0x1, 0xFFFFFFFFFFFFFFFFUL);
-  ASSERT(fixedpoint_is_valid(diff));
+  Fixedpoint expected = fixedpoint_create2(0xFFFFFFFFFFFFFFFEUL, 0xFFFFFFFFFFFFFFFFUL);
   ASSERT(fixedpoint_compare(diff, expected) == 0);
 
   //test case - - (-1 - (-1))
@@ -317,9 +315,22 @@ void test_sub(TestObjs *objs) {
   ASSERT(fixedpoint_is_valid(diff));
   ASSERT(fixedpoint_compare(diff, objs->zero) == 0);
 
+  //frac case: 1/2 - 1/4 = 1/4
+  lhs = objs->one_half;
+  rhs = objs->one_fourth;
+  diff = fixedpoint_sub(lhs, rhs);
+  ASSERT(fixedpoint_is_valid(diff));
+  ASSERT(fixedpoint_compare(diff, objs->one_fourth) == 0);
+
+  //frac case: 1/4 - 1/2 = -1/2
+  lhs = objs->one_fourth;
+  rhs = objs->one_half;
+  diff = fixedpoint_sub(lhs, rhs);
+  ASSERT(fixedpoint_is_neg(diff)); //check if the correct sign is taken
+
   //-b0fc7e0.e993 - caf18a60.2c70 = -d6015241.1603 (random case) - +
   lhs = fixedpoint_create_from_hex("-b0fc7e0.e993");
-  rhs = fixedpoint_create_from_hex("-caf18a60.2c70");
+  rhs = fixedpoint_create_from_hex("caf18a60.2c70");
   diff = fixedpoint_create_from_hex("-d6015241.1603");
   ASSERT(fixedpoint_compare(fixedpoint_sub(lhs, rhs), diff) == 0);
 
@@ -396,25 +407,28 @@ void test_is_err(TestObjs *objs) {
 
 void test_compare(TestObjs *objs) {
   //check to see if 0 is returned (same Fixedpoint) using create
-  Fixedpoint zero_2 = fixedpoint_create(0x0UL);
-  ASSERT(fixedpoint_compare(objs->zero, zero_2));
+  Fixedpoint zero_2 = fixedpoint_create2(0,0);
+  Fixedpoint actual_zero = objs->zero;
+  ASSERT(fixedpoint_compare(actual_zero, zero_2) == 0);
 
   //check to see if compare returns 0 for the same Fixedpoint with both whole and frac parts
   Fixedpoint one_half_3 = fixedpoint_create2(0, 0x10);
-  ASSERT(fixedpoint_compare(objs->one_half, one_half_3));
+  Fixedpoint one_half = objs->one_half;
+  ASSERT(fixedpoint_compare(one_half, one_half_3));
 
   //check to see if -1 is returned when left = 1/4 and right = 1/2 (checking frac part)
-  ASSERT(fixedpoint_compare(objs->one_fourth, objs->one_half) == -1);
+  Fixedpoint one_fourth = objs->one_fourth;
+  ASSERT(fixedpoint_compare(one_fourth, one_half) == -1);
 
   //check to see if 1 is returned when left = 1/2 and right = 1/4 (checking frac part)
-  ASSERT(fixedpoint_compare(objs->one_half, objs->one_fourth) == 1);
+  ASSERT(fixedpoint_compare(one_half, one_fourth) == 1);
 
   //check to see if comparison in whole parts works as expected (expecting -1)
   Fixedpoint four_and_a_half = fixedpoint_create2(0x0000000000000004UL, 0x8000000000000000UL);
-  ASSERT(fixedpoint_compare(objs->one_half, four_and_a_half) == -1);
+  ASSERT(fixedpoint_compare(one_half, four_and_a_half) == -1);
 
   //check to see if comparison in whole parts works as expected (expecting 1)
-  ASSERT(fixedpoint_compare(four_and_a_half, objs->one_fourth) == 1);
+  ASSERT(fixedpoint_compare(four_and_a_half, one_fourth) == 1);
 }
 
 void test_halve(TestObjs *objs) {
