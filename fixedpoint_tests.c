@@ -505,13 +505,6 @@ void test_halve(TestObjs *objs) {
 }
 
 void test_double(TestObjs *objs) {
-<<<<<<< HEAD
-//double test
-}
-
-void test_is_overflow_neg(TestObjs *objs) {
-  
-=======
   //check to see if doubling 1/2 produces 1
   ASSERT(fixedpoint_compare(fixedpoint_double(objs->one_half), objs->one));
 
@@ -544,5 +537,8 @@ void test_is_overflow_neg(TestObjs *objs) {
   lhs = fixedpoint_negate(objs->max);
   doubl = fixedpoint_double(lhs);
   ASSERT(fixedpoint_is_overflow_neg(doubl));
->>>>>>> 4f98bc1af74da7883cd7fcc8dcc6e58f7c4783d9
+}
+
+void test_is_overflow_neg(TestObjs *objs) {
+  
 }
