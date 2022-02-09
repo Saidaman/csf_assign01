@@ -175,16 +175,17 @@ Fixedpoint fixedpoint_double(Fixedpoint val) {
   uint64_t result_whole = val.whole_part << 1;
   uint64_t result_frac = val.frac_part << 1;
   
-  if (result_frac < val.frac_part) {
-    result_whole++;
-  }
-  result.whole_part = result_whole;
-  result.frac_part = result_frac;
   if (result_whole < val.whole_part) {
     result.tags = posover;
   } else {
     result.tags = val.tags;
   }
+  if (result_frac < val.frac_part) {
+    result_whole++;
+  }
+  result.whole_part = result_whole;
+  result.frac_part = result_frac;
+  
   return result;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // uint64_t result_frac = val.frac_part<<1;
