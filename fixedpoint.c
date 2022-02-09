@@ -169,8 +169,24 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
 
 Fixedpoint fixedpoint_double(Fixedpoint val) {
   //need to make sure to correctly show overflow in add
-  return fixedpoint_add(val,val);
-
+  //return fixedpoint_add(val,val);
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Fixedpoint result;
+  uint64_t result_whole = val.whole_part << 1;
+  uint64_t result_frac = val.frac_part << 1;
+  
+  if (result_frac < val.frac_part) {
+    result_whole++;
+  }
+  result.whole_part = result_whole;
+  result.frac_part = result_frac;
+  if (result_whole < val.whole_part) {
+    result.tags = posover;
+  } else {
+    result.tags = val.tags;
+  }
+  return result;
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // uint64_t result_frac = val.frac_part<<1;
   // uint64_t og_wholepart = val.whole_part;
 
