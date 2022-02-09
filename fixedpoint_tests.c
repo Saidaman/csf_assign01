@@ -433,7 +433,7 @@ void test_compare(TestObjs *objs) {
 
 void test_halve(TestObjs *objs) {
 
-  //check to see if halving 1/2 produces 1/4 and no underflow
+  //check to see if halving 1/2 shows no underflow
   ASSERT(fixedpoint_halve(objs->one_half).tags == vnon);
 
   //Testing 4.5 halve, result should be 2.25
