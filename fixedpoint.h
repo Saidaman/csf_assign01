@@ -1,3 +1,10 @@
+/*
+ * Function declarations and descriptions for a fixedpoint arithmetic program.
+ * CSF Assignment 1
+ * Shayan Hossain, Sai Earla
+ * shossa11@jhu.edu, searla1@jhu.edu
+ */
+
 #ifndef FIXEDPREC_H
 #define FIXEDPREC_H
 

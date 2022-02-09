@@ -1,3 +1,10 @@
+/*
+ * Implementation of functions useful for a fixedpoint arithmetic program.
+ * CSF Assignment 1
+ * Shayan Hossain, Sai Earla
+ * shossa11@jhu.edu, searla1@jhu.edu
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -60,8 +67,7 @@ Fixedpoint create_fixedpoint_in_hex(uint64_t points, uint64_t point_index, int n
    if (points == 0) { // No need to worry about a frac part
       whole = strtoull(hex, NULL, 16);
       frac = 0;
-   } 
-   else { // Need to worry about frac part
+   } else { // Need to worry about frac part
       whole = strtoull(hex, NULL, 16);
    
       char frac_string[17];
@@ -78,10 +84,10 @@ Fixedpoint create_fixedpoint_in_hex(uint64_t points, uint64_t point_index, int n
    Fixedpoint result = fixedpoint_create2(whole, frac);
    if (negated) {
       result.tags = vneg;
-   }
-   else {
+   } else {
       result.tags = vnon;   
    }
+
    return result;
 }
 
@@ -244,8 +250,7 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
     val.whole_part = val.whole_part >> 1;
     val.frac_part = val.frac_part >> 1;
     val.frac_part = val.frac_part + 0x8000000000000000;
-  }
-  else { //if even
+  } else { //if even
     val.whole_part = val.whole_part >> 1;
     val.frac_part = val.frac_part >> 1;
   }
@@ -306,37 +311,51 @@ int fixedpoint_is_zero(Fixedpoint val) {
 }
 
 int fixedpoint_is_err(Fixedpoint val) {
-  if (val.tags == error) return 1;
+  if (val.tags == error) {
+    return 1;
+  }
   return 0;
 }
 
 int fixedpoint_is_neg(Fixedpoint val) {
-  if (val.tags == vneg) return 1;
+  if (val.tags == vneg) {
+    return 1;
+  }
   return 0;
 }
 
 int fixedpoint_is_overflow_neg(Fixedpoint val) {
-  if (val.tags == negover) return 1;
+  if (val.tags == negover) {
+    return 1;
+  }
   return 0;
 }
 
 int fixedpoint_is_overflow_pos(Fixedpoint val) {
-  if (val.tags == posover) return 1;
+  if (val.tags == posover) {
+    return 1;
+  }
   return 0;
 }
 
 int fixedpoint_is_underflow_neg(Fixedpoint val) {
-  if (val.tags == negunder) return 1;
+  if (val.tags == negunder) {
+    return 1;
+  }
   return 0;
 }
 
 int fixedpoint_is_underflow_pos(Fixedpoint val) {
-  if (val.tags == posunder) return 1;
+  if (val.tags == posunder) {
+    return 1;
+  }
   return 0;
 }
 
 int fixedpoint_is_valid(Fixedpoint val) {
-  if ((val.tags == vnon) || (val.tags == vneg)) return 1;
+  if ((val.tags == vnon) || (val.tags == vneg)) {
+    return 1;
+  }
   return 0;
 }
 
