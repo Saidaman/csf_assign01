@@ -34,6 +34,17 @@ Fixedpoint fixedpoint_create(uint64_t whole);
 //   the Fixedpoint value
 Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac);
 
+// Verify whether a given string validly expresses a hex value.
+//
+// Paramaters:
+//   hex - the string representing a hex value
+//
+// Returns:
+//   if the string is valid, 1
+//   if the string is invlaid, 0
+
+int valid_hex(const char *hex);
+
 // Create a Fixedpoint value from a string representation.
 // The string will have one of the following forms:
 //

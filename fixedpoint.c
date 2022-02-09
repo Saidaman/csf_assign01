@@ -25,10 +25,88 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
   return x;
 }
 
+int valid_hex(const char *hex) {
+   uint64_t points = 0;
+   uint64_t valid_chars = 0;
+   uint64_t valid_chars_in_each_half[2] = {0, 0};
+   int which_half = 0;
+   int valid = 1;
+   
+   uint64_t length = strlen(hex);
+   for (uint64_t i = 0; i < length; i++) {
+      if (hex[i] == '.') {
+         points++;
+         which_half = 1;
+      }
+      uint64_t is_valid_char = (hex[i] >= '0' && hex[i] <= '9') || (hex[i] >= 'a' && hex[i] <= 'f') || (hex[i] >= 'A' && hex[i] <= 'F');
+      if (!(is_valid_char || hex[i] == '-' || hex[i] == '.')) {
+         valid = 0;
+      }
+      if (is_valid_char) {
+         valid_chars_in_each_half[which_half] += 1;
+      }
+   }
+   if (valid_chars_in_each_half[0] > 16 || valid_chars_in_each_half[1] > 16 || points > 1) {
+      valid = 0;
+   }
+   
+   return valid;
+}
+
 Fixedpoint fixedpoint_create_from_hex(const char *hex) {
-  //TODO
-assert(0);
-return DUMMY;
+  if (!valid_hex(hex)) {
+      Fixedpoint error_fpv = fixedpoint_create2(0, 0);
+      error_fpv.tags = error;
+      return error_fpv;
+   }
+
+   uint64_t points = 0;
+   uint64_t point_index = 0;
+   uint64_t length = strlen(hex);
+   for (uint64_t i = 0; i < length; i++) {
+      if (hex[i] == '.') {
+         points++;
+         point_index = i;
+      }
+   }
+
+   uint64_t negated = 0;	
+   if (hex[0] == '-') {
+      negated = 1;
+      hex++;
+   }
+
+   uint64_t whole = 0;
+   uint64_t frac = 0;
+   
+   if (points == 0) {
+      whole = strtoull(hex, NULL, 16);
+      frac = 0;
+   } 
+   else {
+      whole = strtoull(hex, NULL, 16);
+   
+      char frac_string[17];
+      strcpy(frac_string, hex + point_index + 1 - negated);
+   
+      uint64_t frac_length = strlen(frac_string);
+      uint64_t padding = 16 - frac_length;
+      char zero_padding[17];
+      memset(zero_padding, '0', padding);
+      zero_padding[padding] = '\0';
+   
+      char * padded_frac = strcat(frac_string, zero_padding);
+      frac = strtoull(padded_frac, NULL, 16);
+   }
+
+   Fixedpoint result = fixedpoint_create2(whole, frac);
+   if (negated) {
+      result.tags = vneg;
+   }
+   else {
+      result.tags = vnon;   
+   }
+   return result;
 }
 
 uint64_t fixedpoint_whole_part(Fixedpoint val) {
