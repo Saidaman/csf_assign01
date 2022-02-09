@@ -30,11 +30,15 @@ void test_sub(TestObjs *objs);
 void test_is_overflow_pos(TestObjs *objs);
 void test_is_err(TestObjs *objs);
 
-    // TODO: add more test functions
+    //more test functions
 void test_compare(TestObjs *objs);
 void test_halve(TestObjs *objs);
 void test_double(TestObjs *objs);
 void test_is_overflow_neg(TestObjs *objs);
+void test_is_valid(TestObjs *objs);
+void test_is_zero(TestObjs *objs);
+void test_is_underflow_pos(TestObjs *objs);
+void test_is_underflow_neg(TestObjs *objs);
 
 int main(int argc, char **argv)
 {
@@ -55,6 +59,7 @@ int main(int argc, char **argv)
   TEST(test_sub);
   TEST(test_is_overflow_pos);
   TEST(test_is_err);
+  TEST(test_is_valid);
   
 
   // IMPORTANT: if you add additional test functions (which you should!),
@@ -68,6 +73,9 @@ int main(int argc, char **argv)
   TEST(test_halve);
   TEST(test_double);
   TEST(test_is_overflow_neg);
+  TEST(test_is_zero);
+  TEST(test_is_underflow_pos);
+  TEST(test_is_underflow_neg);
 
   TEST_FINI();
 }
@@ -285,9 +293,9 @@ void test_add(TestObjs *objs) {
   lhs = objs->one_half;
   Fixedpoint add_temp = objs->one_fourth;
   Fixedpoint temp_sum = fixedpoint_add(lhs, add_temp);
-  rhs = objs -> one_half;
+  rhs = objs->one_half;
   sum = fixedpoint_add(rhs, temp_sum);
-  Fixedpoint one_and_one_fourth = fixedpoint_create2(0UL, 0x4000000000000000UL);
+  Fixedpoint one_and_one_fourth = fixedpoint_create2(1UL, 0x4000000000000000UL);
   ASSERT(fixedpoint_compare(one_and_one_fourth, sum) == 0);
 
   //complex negative add case: adding fractions for a fractional result
@@ -506,7 +514,7 @@ void test_halve(TestObjs *objs) {
 
 void test_double(TestObjs *objs) {
   //check to see if doubling 1/2 produces 1
-  ASSERT(fixedpoint_compare(fixedpoint_double(objs->one_half), objs->one));
+  ASSERT(fixedpoint_compare(fixedpoint_double(objs->one_half), objs->one) == 0);
 
   //check to ses if doubling 1/2 doesn't overflow
   ASSERT(fixedpoint_double(objs->one_half).tags == vnon);
@@ -540,5 +548,73 @@ void test_double(TestObjs *objs) {
 }
 
 void test_is_overflow_neg(TestObjs *objs) {
+  Fixedpoint sum;
+  Fixedpoint neg_max = fixedpoint_negate(objs->max);
+  Fixedpoint neg_one = fixedpoint_negate(objs->one);
+
+  sum = fixedpoint_add(neg_max, neg_one);
+  ASSERT(fixedpoint_is_overflow_neg(sum));
+
+  sum = fixedpoint_add(neg_one, neg_max);
+  ASSERT(fixedpoint_is_overflow_neg(sum));
+}
+
+void test_is_valid(TestObjs *objs) {
+  Fixedpoint one = objs->one;
+  Fixedpoint err3 = fixedpoint_create_from_hex("-6666666666666666.8888888888888888");
+
+  //All valid fixedpoints
+  ASSERT(fixedpoint_is_valid(one));
+  ASSERT(fixedpoint_is_valid(objs->zero));
+  ASSERT(fixedpoint_is_valid(objs->large1));
+  ASSERT(fixedpoint_is_valid(objs->large2));
+  ASSERT(fixedpoint_is_valid(err3));
+
+  Fixedpoint err1 = fixedpoint_create_from_hex("88888888888888889.6666666666666666");
+  //Not valid fixedpoints
+  ASSERT(fixedpoint_is_valid(err1) != 1);
+}
+
+void test_is_zero(TestObjs *objs) {
+  Fixedpoint neg_zero = fixedpoint_negate(objs->zero);
   
+  //zero values
+  ASSERT(fixedpoint_is_zero(objs->zero));
+  ASSERT(fixedpoint_is_zero(neg_zero));
+
+  //not zero values
+  ASSERT(fixedpoint_is_zero(objs->one) != 1);
+  ASSERT(fixedpoint_is_zero(objs->max) != 1);
+}
+
+void test_is_underflow_pos(TestObjs *objs) {
+  Fixedpoint result = fixedpoint_halve(objs->max);
+
+  //should be an underflow
+  ASSERT(fixedpoint_is_underflow_pos(result));
+  //last bit in frac is 1
+  result = fixedpoint_create2(0, 0x000000000000000FUL);
+  result = fixedpoint_halve(result);
+  ASSERT(fixedpoint_is_underflow_pos(result));
+
+  //should not be an underflow
+  result = fixedpoint_halve(objs->one_half);
+  ASSERT(fixedpoint_is_underflow_pos(result) != 1);
+}
+
+void test_is_underflow_neg(TestObjs *objs) {
+  //negative max
+  Fixedpoint result = fixedpoint_halve(fixedpoint_negate(objs->max));
+
+  //should be an underflow
+  ASSERT(fixedpoint_is_underflow_neg(result));
+  //last bit in frac is 1
+  result = fixedpoint_create2(0, 0x000000000000000FUL);
+  result = fixedpoint_negate(result);
+  result = fixedpoint_halve(result);
+  ASSERT(fixedpoint_is_underflow_neg(result));
+
+  //should not be an underflow
+  result = fixedpoint_halve(fixedpoint_negate(objs->one_half));
+  ASSERT(fixedpoint_is_underflow_pos(result) != 1);
 }
